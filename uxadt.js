@@ -18,10 +18,12 @@ var uxadt = (function(){
       for (var k = 0; k < inst.length; k++)
         list += (k>0?", ":"") + uxadt.toString(inst[k]);
       return "[" + list + "]";
-    } else if (typeof inst === 'string') {
-      return '"' + inst + '"';
     } else if (inst.uxadt == null) {
       return inst.toString();
+    } else if (typeof inst === 'string') {
+      return '"' + inst + '"';
+    } else if (typeof inst.uxadt === 'string') {
+      return inst.uxadt;
     } else {
       for (var c in inst.uxadt) { // Only to extract key.
         var data = inst.uxadt[c], args = "";
@@ -54,15 +56,38 @@ var uxadt = (function(){
   // (from matched subtrees) with overlapping domains results in
   // a non-match (i.e., null).
   uxadt.match = function (inst, pattern) {
+    var map = {};
+
+    // uxadt variable matched to array or string.
+    if (typeof pattern.uxadt === 'string') {
+      if (typeof inst === 'string') {
+        map[pattern.uxadt] = inst;
+        return map;
+      }
+      if (Object.prototype.toString.call(inst) === '[object Array]') {
+        map[pattern.uxadt] = inst;
+        return map;
+      }
+    }
+
+    // If pattern is an array.
+    if (Object.prototype.toString.call(pattern) === '[object Array]') {
+      if (Object.prototype.toString.call(inst) === '[object Array]') {
+        return uxadt.match(uxadt.C("@", inst), uxadt.C("@", pattern));
+      }
+    }
+
+    // Neither is a uxadt object.
     if (inst.uxadt == null || pattern.uxadt == null)
       return null;
-    var map = {};
+
+    // Both are uxadt objects.
     if (typeof pattern.uxadt === 'string') {
       var v = pattern.uxadt;
       map[v] = inst;
       return map;
     } else {
-      for (ci in inst.uxadt) { for (cp in pattern.uxadt) { 
+      for (var ci in inst.uxadt) { for (var cp in pattern.uxadt) { 
         if (ci == cp) {
           if (inst.uxadt[ci].length != pattern.uxadt[cp].length)
             return null;
@@ -72,14 +97,15 @@ var uxadt = (function(){
             var tmp = uxadt.match(inst.uxadt[ci][k], pattern.uxadt[cp][k]);
             if (tmp == null)
               return null;
-            for (v in tmp) {
-              if (map[v] != null) // No match if variable is already matched.
+            for (var v in tmp) {
+              if (map[v] != null) { // No match if variable is already matched.
                 return null;
-              else
+              } else {
                 map[v] = tmp[v];
+              }
             }
-            return map;
           }
+          return map;
         }
       }}
     }
