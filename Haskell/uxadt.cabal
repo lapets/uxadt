@@ -1,0 +1,14 @@
+Name:              uxadt
+Version:           0.0.0.1
+Synopsis:          Universal (cross-language) extensible representation for algebraic data type instances.
+Description:       Universal (cross-language) extensible representation for algebraic data type instances.
+Category:          Text
+License:           GPL
+Author:            Andrei Lapets
+Maintainer:        Andrei Lapets <lapets@bu.edu>
+Build-Type:        Simple
+Cabal-Version:     >= 1.2
+
+library
+  Exposed-Modules: Text.UXADT
+  Build-Depends:   base >= 3 && < 5

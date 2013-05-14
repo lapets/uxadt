@@ -13,16 +13,24 @@ var uxadt = (function(){
 
   // Build a string representation of an instance.
   uxadt.toString = function (inst) {
-    if (inst.uxadt == null)
+    if (Object.prototype.toString.call(inst) === '[object Array]') {
+      var list = "";
+      for (var k = 0; k < inst.length; k++)
+        list += (k>0?", ":"") + uxadt.toString(inst[k]);
+      return "[" + list + "]";
+    } else if (typeof inst === 'string') {
+      return '"' + inst + '"';
+    } else if (inst.uxadt == null) {
       return inst.toString();
-    else if (typeof inst.uxadt === 'string')
-      return inst.uxadt;
-    else {
-      for (c in inst.uxadt) { // Only to extract key.
+    } else {
+      for (var c in inst.uxadt) { // Only to extract key.
         var data = inst.uxadt[c], args = "";
-        if (data.length != null && data.length > 0)
-          for (var k = 0; k < data.length; k++)
-            args = (k>0?", ":"") + args + uxadt.toString(data[k]);
+        if (data.length != null && data.length > 0) {
+          for (var k = 0; k < data.length; k++) {
+            var arg = uxadt.toString(data[k]);
+            args += (arg==null?"":((k>0?", ":"")+arg));
+          }
+        }
         return c + (data.length > 0 ? "(" + args + ")" : "");
       }
     }
@@ -82,6 +90,8 @@ var uxadt = (function(){
   uxadt.C = uxadt.constructor;
   uxadt.V = uxadt.variable;
   uxadt.M = uxadt.match;
+  uxadt.N = null;
+  uxadt.None = uxadt.N;
 
   return uxadt;
 })();
