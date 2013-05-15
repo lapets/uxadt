@@ -1,6 +1,6 @@
 Name:              uxadt
 Version:           0.0.0.1
-Synopsis:          Universal (cross-language) extensible representation for algebraic data type instances.
+Synopsis:          Cross-language extensible representation for algebraic data types.
 Description:       Universal (cross-language) extensible representation for algebraic data type instances.
 Category:          Text
 License:           GPL
@@ -11,4 +11,4 @@ Cabal-Version:     >= 1.2
 
 library
   Exposed-Modules: Text.UXADT
-  Build-Depends:   base >= 3 && < 5
+  Build-Depends:   base >= 3 && < 5, MissingH
