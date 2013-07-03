@@ -17,10 +17,10 @@ version :: Version
 version = Version {versionBranch = [0,0,0,1], versionTags = []}
 bindir, libdir, datadir, libexecdir :: FilePath
 
-bindir     = "C:\\Documents and Settings\\Administrator\\Application Data\\cabal\\bin"
-libdir     = "C:\\Documents and Settings\\Administrator\\Application Data\\cabal\\uxadt-0.0.0.1\\ghc-7.4.2"
-datadir    = "C:\\Documents and Settings\\Administrator\\Application Data\\cabal\\uxadt-0.0.0.1"
-libexecdir = "C:\\Documents and Settings\\Administrator\\Application Data\\cabal\\uxadt-0.0.0.1"
+bindir     = "C:\\Users\\al\\AppData\\Roaming\\cabal\\bin"
+libdir     = "C:\\Users\\al\\AppData\\Roaming\\cabal\\uxadt-0.0.0.1\\ghc-7.4.2"
+datadir    = "C:\\Users\\al\\AppData\\Roaming\\cabal\\uxadt-0.0.0.1"
+libexecdir = "C:\\Users\\al\\AppData\\Roaming\\cabal\\uxadt-0.0.0.1"
 
 getBinDir, getLibDir, getDataDir, getLibexecDir :: IO FilePath
 getBinDir = catchIO (getEnv "uxadt_bindir") (\_ -> return bindir)
