@@ -1,5 +1,6 @@
 ## Release script for HackageDB.
 
+rm -rf dist
 runhaskell Setup.lhs configure --user
 runhaskell Setup.lhs build
 runhaskell Setup.lhs install
