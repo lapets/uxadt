@@ -1,15 +1,15 @@
 ----------------------------------------------------------------
 --
--- UXADT
+-- UxADT
 -- 
--- Text/UXADT.hs
+-- Text/UxADT.hs
 --   Universal (cross-language) extensible representation for
 --   algebraic data type instances.
 
 ----------------------------------------------------------------
 -- 
 
-module Text.UXADT
+module Text.UxADT
   where
 
 import Data.String.Utils (join)
@@ -20,44 +20,49 @@ import Data.String.Utils (join)
 type Variable = String
 type Constructor = String
 
-data UXADT =
-    I Int
+data UxADT =
+    B Bool
+  | I Int
   | F Float
   | D Double
   | S String
   | V Variable
-  | C Constructor [UXADT]
-  | L [UXADT]
+  | C Constructor [UxADT]
+  | L [UxADT]
   | None
   deriving  (Eq)
 
-class ToUXADT a where
-  uxadt :: a -> UXADT
+class ToUxADT a where
+  uxadt :: a -> UxADT
 
 ----------------------------------------------------------------
--- Default membership in ToUXADT.
+-- Default membership in ToUxADT.
 
-instance ToUXADT Int where
+instance ToUxADT Bool where
+  uxadt = B
+
+instance ToUxADT Int where
   uxadt = I
 
-instance ToUXADT Float where
+instance ToUxADT Float where
   uxadt = F
 
-instance ToUXADT Double where
+instance ToUxADT Double where
   uxadt = D
 
-instance ToUXADT a => ToUXADT [a] where
+instance ToUxADT a => ToUxADT [a] where
   uxadt l = L $ map uxadt l
 
-instance ToUXADT a => ToUXADT (Maybe a) where
+instance ToUxADT a => ToUxADT (Maybe a) where
   uxadt m = maybe None uxadt m
 
 ----------------------------------------------------------------
 -- Conversion to Javascript in ASCII string representation.
 
-instance Show UXADT where
+instance Show UxADT where
   show u = to "" u where
     to ind u = case u of
+      B b    -> show b
       I i    -> show i
       F f    -> show f
       D d    -> show d
@@ -70,7 +75,7 @@ instance Show UXADT where
 ----------------------------------------------------------------
 -- Other useful functions.
 
-javaScriptModule :: String -> UXADT -> String
+javaScriptModule :: String -> UxADT -> String
 javaScriptModule name u = 
   "var " ++ name ++ " = (function(){return " ++ show u ++ ";})();"
 
