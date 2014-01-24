@@ -71,6 +71,7 @@ class uxadt():
 
     _ = None
 
+    # Pattern matching unification algorithm.
     @staticmethod
     def unify(p, v):
         if not isinstance(p, Value):
@@ -93,7 +94,7 @@ class uxadt():
     @staticmethod
     def definition(sigs):
         # Since emitted code will refer to uxadt operations
-	# by name, the object must be defined in the scope.
+      	# by name, the object must be defined in the scope.
         if not 'uxadt' in globals():
             raise NameError('UxADT error: identifier uxadt must be defined.')
 
@@ -119,19 +120,58 @@ eval(uxadt.definition({\
     'Leaf': []\
     }))
 
-x = Node(Node(Leaf(), Leaf()), Leaf())
-y = Node(Node(Leaf(), Leaf()), Node(Leaf(), Leaf()))
-z = Leaf()
+x = Leaf()
+y = Node(Node(Leaf(), Leaf()), Leaf())
+z = Node(Node(Leaf(), Leaf()), Node(Leaf(), Leaf()))
 
 def nodes(t):
     return t\
-        .match(Leaf(), lambda: 1)\
+        .match(Leaf(), lambda: 0)\
         .match(Node(_, _), lambda x,y: 1 + nodes(x) + nodes(y))\
         .end
 
-print(nodes(Leaf()))
-print(nodes(Node(Leaf(), Node(Leaf(), Leaf()))))
+def leaves(t):
+    return t\
+        .match(Leaf(), lambda: 1)\
+        .match(Node(_, _), lambda x,y: leaves(x) + leaves(y))\
+        .end
+
+def height(t):
+    return t\
+        .match(Leaf(), lambda: 1)\
+        .match(Node(_, _), lambda x,y: 1 + max(height(x), height(y)))\
+        .end
+
+def perfect(t):
+    return t\
+        .match(Leaf(), lambda: True)\
+        .match(Node(_, _), lambda x,y: (height(x) == height(y)) and (perfect(x) and perfect(y)))\
+        .end
+
+## Only returns True for Leaf(), everything else returns None
+def degenerate(t):
+    return t\
+        .match(Leaf(), lambda: True)\
+        .match(Node(_, _), lambda x,y: (x == Leaf() and degenerate(y)) or (y == Leaf() and degenerate(x)))\
+        .end
+
+def toStr(t):
+    return t\
+        .match(Leaf(), lambda: "Leaf")\
+        .match(Node(_, _), lambda x,y: "Node { " + toStr(x) + ", " + toSty) + " }")\
+        .end
+
+print("Nodes:")
+print(nodes(x))
 print(nodes(y))
+print(nodes(z))
+
+print("\nLeaves:")
+print(leaves(x))
+print(leaves(y))
+print(leaves(z))
+
+
 '''
 
 ##eof
