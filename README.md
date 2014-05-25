@@ -12,7 +12,7 @@ The directory structure and noteworthy files are as follows:
   The Haskell version of the library, ready for packaging.
 
   - `/Haskell/release.sh`
-  Release script for building package for manual submission to HackageDB (`http://hackage.haskell.org/`).
+  Release script for building package for manual submission to [HackageDB](http://hackage.haskell.org/).
 
   - `/Haskell/Text/UxADT.hs`
   The source of the Haskell version of the library.
@@ -21,7 +21,7 @@ The directory structure and noteworthy files are as follows:
   The JavaScript version of the library, ready for packaging and publication.
 
   - `/JavaScript/release.sh`
-  Release script for building package and publishing it on npmjs (`https://www.npmjs.org/`).
+  Release script for building package and publishing it on [npmjs.org](https://www.npmjs.org/).
 
   - `/JavaScript/lib/uxadt.js`
   The source of the JavaScript version of the library.
@@ -36,7 +36,7 @@ The directory structure and noteworthy files are as follows:
   The Python version of the library, ready for packaging and publication.
 
   - `/Python/release.sh`
-  Release script for building package and publishing it on PyPI (`https://pypi.python.org/`).
+  Release script for building package and publishing it on [PyPI](https://pypi.python.org/).
 
   - `/Python/uxadt/uxadt.py`
   The source of the Python version of the library.
