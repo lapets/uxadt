@@ -8,14 +8,13 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.0.2
+**   Version: 0.0.3
 **
 */
 
 (function (_, uxadt) {
 
   "use strict";
-
 
   // Wildcard pattern is _.
   uxadt._ = _;

@@ -8,9 +8,12 @@
 ##   matching) on algebraic data type values.
 ##
 ##   Web:     uxadt.org
-##   Version: 0.0.0.3
+##   Version: 0.0.0.4
 ##
 ##
+
+import inspect
+from types import ModuleType
 
 #####################################################################
 ## Representation for individual algebraic data type values and
@@ -22,6 +25,8 @@ class Value():
 
     # Structural equality.
     def equal(self, other):
+        if hasattr(self, '__last__'): delattr(self, '__last__')
+        if hasattr(other, '__last__'): delattr(other, '__last__')
         for c in self.__dict__:
             for d in other.__dict__:
                 if c == d and len(self.__dict__[c]) == len(other.__dict__[d]):
@@ -33,20 +38,39 @@ class Value():
                     return False
         return False
 
+    def __eq__(v, w):
+        return v.equal(w)
+
     # Matching function.
     def match(self, p, f):
+        if hasattr(self, '__last__'): delattr(self, '__last__')
+        if hasattr(p, '__last__'): delattr(p, '__last__')
         subst = uxadt.unify(p, self)
-        return Matching(self, None if subst is None else f(*subst))
+        return _Matching(self, None if subst is None else f(*[v for (x,v) in subst]))
 
     # Matching function (concise synonym).
     def _(self, p, f):
-        subst = uxadt.unify(p, self)
-        return Matching(self, None if subst is None else f(*subst))
+        return match(self, p, f)
+
+    # Convenient, stateful alternative for Python
+    # "if" statement blocks.
+    def __lt__(v, p):
+        subst = uxadt.unify(p, v)
+        if subst != None:
+            v.__last__ = [v for (x,v) in subst]
+        return subst != None
+
+    def __iter__(self):
+        if hasattr(self, '__last__'):
+            tmp = self.__last__
+            delattr(self, '__last__')
+            return iter(tmp)
+        raise NameError('UxADT error: can only traverse result of match exactly once.')
 
 #####################################################################
 ## Representation for state of matching computations.
 
-class Matching():
+class _Matching():
     candidate = None
     end = None
 
@@ -58,23 +82,26 @@ class Matching():
 
     # Matching function.
     def match(self, p, f):
-        return Matching(None, self.end) if self.candidate is None else  self.candidate.match(p, f)
+        return _Matching(None, self.end) if self.candidate is None else  self.candidate.match(p, f)
 
     # Matching function (concise synonym).
     def _(self, p, f):
-        return Matching(None, self.end) if self.candidate is None else  self.candidate.match(p, f)
+        return _Matching(None, self.end) if self.candidate is None else  self.candidate.match(p, f)
 
 #####################################################################
 ## Container class for library.
 
 class uxadt():
-
     _ = None
 
+    # Pattern matching unification algorithm.
     @staticmethod
     def unify(p, v):
+        if type(p) == str:
+            return [(p, v)]
+
         if not isinstance(p, Value):
-            return [v]
+            return [(None, v)]
 
         for c in p.__dict__:
             for d in v.__dict__:
@@ -92,46 +119,83 @@ class uxadt():
 
     @staticmethod
     def definition(sigs):
-        # Since emitted code will refer to uxadt operations
-	# by name, the object must be defined in the scope.
-        if not 'uxadt' in globals():
-            raise NameError('UxADT error: identifier uxadt must be defined.')
+      # Since emitted code will refer to uxadt operations
+      # by name, the module must be defined in the scope.
+      # Find the module name and return the code to evaluate.
+      frame = inspect.currentframe()
+      for name in frame.f_back.f_locals:
+          try:
+              if type(frame.f_back.f_locals[name]) == ModuleType and frame.f_back.f_locals[name].Value == Value:
+                  stmts = []
+                  stmts += [con + " = lambda *args, **kwargs: "+name+".Value({'" + con + "': args})" for con in sigs]
+                  stmts = ['exec("' + s + '")' for s in stmts]
+                  return '(' + ",".join(stmts) + ')'
+          except: pass
+      for name in frame.f_globals:
+          try:
+              if frame.f_globals[name] == Value:
+                  stmts = []
+                  stmts += [con + " = lambda *args, **kwargs: " + name + "({'" + con + "': args})" for con in sigs]
+                  stmts = ['exec("' + s + '")' for s in stmts]
+                  return '(' + ",".join(stmts) + ')'
+          except: pass
+      raise NameError('UxADT error: module cannot be found in global scope. '+\
+                      'Please ensure that the module is being loaded correctly.')
 
-        stmts = []
-        stmts += [con + " = lambda *args, **kwargs: Value({'" + con + "': args})" for con in sigs]
-        stmts = ['exec("' + s + '")' for s in stmts]
-        return '(' + ",".join(stmts) + ')'
-
+    @staticmethod
+    def define(sigs):
+        definition(sigs)
+           
+                      
 #####################################################################
 ## Useful global synonyms.
 
-try:
-    _
+try:    _
 except:
-    _ = uxadt._
+  _ = uxadt._
+
+try:    definition
+except: definition = uxadt.definition
+
+try:    define
+except: define = uxadt.definition
 
 #####################################################################
 ## Examples.
 
 '''
-eval(uxadt.definition({\
+eval(define({\
     'Node': [_, _],\
     'Leaf': []\
     }))
 
-x = Node(Node(Leaf(), Leaf()), Leaf())
-y = Node(Node(Leaf(), Leaf()), Node(Leaf(), Leaf()))
-z = Leaf()
+x = Leaf()
+y = Node(Node(Leaf(), Leaf()), Leaf())
+z = Node(Node(Leaf(), Leaf()), Node(Leaf(), Leaf()))
 
 def nodes(t):
     return t\
-        .match(Leaf(), lambda: 1)\
+        .match(Leaf(), lambda: 0)\
         .match(Node(_, _), lambda x,y: 1 + nodes(x) + nodes(y))\
         .end
 
-print(nodes(Leaf()))
-print(nodes(Node(Leaf(), Node(Leaf(), Leaf()))))
-print(nodes(y))
+def leaves(t):
+  return t\
+    .match(Leaf(), lambda: 1)\
+    .match(Node(_, _), lambda x,y: leaves(x) + leaves(y))\
+    .end
+
+def height(t):
+  return t\
+    .match(Leaf(), lambda: 1)\
+    .match(Node(_, _), lambda x,y: 1 + max(height(x), height(y)))\
+    .end
+
+def perfect(t):
+  return t\
+    .match(Leaf(), lambda: True)\
+    .match(Node(_, _), lambda x,y: (height(x) == height(y)) and (perfect(x) and perfect(y)))\
+    .end
 '''
 
 ##eof
