@@ -86,7 +86,7 @@
 
   // Function for introducing a new algebraic data type
   // (can introduce constructors into specified scope).
-  uxadt.define = function () {
+  uxadt.definition = function () {
     var cases, obj;
     if (arguments.length == 1) {
       obj = {};
@@ -101,6 +101,8 @@
 
     return obj;
   }
+  
+  uxadt.define = uxadt.definition;
 
 //})(typeof exports !== 'undefined' ? exports : (this.uxadt = {}));
 //})(this.uxadt = (function(){}));

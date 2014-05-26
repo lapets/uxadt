@@ -6,7 +6,7 @@ Universal (cross-language) extensible representation for algebraic data type ins
 Directory Structure
 -------------------
 
-The directory structure and noteworthy files are as follows:
+The directory structure and locations of noteworthy files are as follows:
 
 * `/Haskell/`
   The Haskell version of the library, ready for packaging.
