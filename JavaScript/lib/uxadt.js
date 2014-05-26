@@ -89,19 +89,22 @@
   uxadt.definition = function () {
     var cases, obj;
     if (arguments.length == 1) {
-      obj = {};
+      // Build a string to use with eval().
+      obj = "";
       cases = arguments[0];
+      for (var con in cases)
+        obj += con + "=uxadt.constructor(con);";
     } else if (arguments.length == 2) {
+      // Define constructors as members of the supplied object.
       obj = arguments[0];
       cases = arguments[1];
+      for (var con in cases)
+        obj[con] = (cases[con].length == 0) ? uxadt.constructor(con) : uxadt.constructor(con);
     }
-
-    for (var con in cases)
-      obj[con] = (cases[con].length == 0) ? uxadt.constructor(con) : uxadt.constructor(con);
 
     return obj;
   }
-  
+
   uxadt.define = uxadt.definition;
 
 //})(typeof exports !== 'undefined' ? exports : (this.uxadt = {}));
