@@ -29,7 +29,13 @@ def count(t):
         ._(Node(_, _), lambda x,y: 1 + count(x) + count(y))\
         .end
 
-print(count(t0))
+print("Example #1")
+print(str(t0) + " has count " + str(count(t0)) + ".")
+print(t0.data())
+t0.at('count', count(t0))
+print(str(t0.at('count')))
+print(t0.data())
+print("")
 
 #####################################################################
 ## Defining a named object that has the constructors as its methods.
@@ -48,9 +54,12 @@ def count(t):
         ._(Tree.Node(_, _), lambda x,y: 1 + count(x) + count(y))\
         .end
 
+print("Example #2")
 print(str(t0) + " has count " + str(count(t0)) + ".")
+print(t0.data())
 t0.at('count', count(t0))
 print(str(t0.at('count')))
-
+print(t0.data())
+print("")
 
 ##eof

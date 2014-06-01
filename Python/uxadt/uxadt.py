@@ -132,7 +132,8 @@ class Value():
 
     # Rendering as a native nested data structure.
     def data(self):
-        return None
+        for c in self.__dict__:
+            return {c: [v.data() for v in self.__dict__[c]]}
 
     # Rendering as a string.
     def __str__(self): return self.string()
@@ -178,7 +179,7 @@ def asobject(sigs):
     class Obj(object):
         def __init__(self, cons):
             self.__dict__.update(cons)
-    return Obj({con: lambda *args, **kwards: Value({con: args}) for con in sigs})
+    return Obj({con: eval("lambda *args: Value({'"+con+"': args})") for con in sigs})
 
 # A synonym for the default technique.
 def definition(sigs):
