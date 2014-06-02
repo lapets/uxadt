@@ -16,12 +16,12 @@ define('_', null);
 
 eval(\uxadt\_(array(
     'Red' => array(),
-	'Blue' => array()
+    'Blue' => array()
   )));
 
 eval(\uxadt\_(array(
     'Node' => array(_, _),
-	'Leaf' => array()
+    'Leaf' => array()
   )));
 
 $c0 = Red();
@@ -66,12 +66,12 @@ print "\n";
 
 $Color = \uxadt\qualified('Color', array(
     'Red' => array(),
-	'Blue' => array()
+    'Blue' => array()
   ));
 
 \uxadt\qualified('Tree', array(
     'Node' => array(_, _),
-	'Leaf' => array()
+    'Leaf' => array()
   ));
 
 $c0 = $Color->Red();
