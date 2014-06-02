@@ -1,0 +1,10 @@
+{
+    "name": "uxadt",
+    "type": "library",
+    "description": "Universal (cross-language) extensible representation for algebraic data type instances.",
+    "homepage": "http://uxadt.org",
+    "license": "MIT",
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
