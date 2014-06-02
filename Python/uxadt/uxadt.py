@@ -57,7 +57,7 @@ class Value():
         # Compare the constructors and recursively check equality.
         for c in self.__dict__:
             for d in other.__dict__:
-                if c[0:2] != '__' and d[0:2] != '__':
+                if c[0:min(len(c),2)] != '__' and d[0:min(len(d),2)] != '__':
                     if c == d and len(self.__dict__[c]) == len(other.__dict__[d]):
                         for i in range(0,len(self.__dict__[c])):
                             if not self.__dict__[c][i].equal(other.__dict__[d][i]):
@@ -65,7 +65,7 @@ class Value():
                         return True
                     else:
                         return False
-        return False
+        return False # Failure
 
     # Pattern matching unification algorithm.
     @staticmethod
@@ -76,7 +76,7 @@ class Value():
         # Compare the constructors and recursively unify if they match.
         for c in p.__dict__:
             for d in v.__dict__:
-                if c[0:2] != '__' and d[0:2] != '__':
+                if c[0:min(len(c),2)] != '__' and d[0:min(len(d),2)] != '__':
                     if c == d and len(p.__dict__[c]) == len(v.__dict__[d]):
                         substs = []
                         for i in range(0,len(p.__dict__[c])):
@@ -139,12 +139,12 @@ class Value():
                 return c + '(' + ', '.join([v.toString() for v in self.__dict__[c]]) + ')'
 
 #####################################################################
-## Functions for defining algebraic data type constructors. There are
-## two ways techniques supported for introducing constructors:
+## Functions for defining algebraic data type constructors. There
+## are two ways techniques supported for introducing constructors:
 ##  * defining them in the local scope as stand-alone, unqualified
 ##    functions by passing the definition string to eval();
-##  * defining a named object that has the named constructors as its
-##    only methods.
+##  * defining a named class or object that has the named
+##    constructors as its only methods.
 ##
 
 def unqualified(sigs):
@@ -170,7 +170,7 @@ def unqualified(sigs):
                 stmts = ['exec("' + s + '")' for s in stmts]
                 return '(' + ",".join(stmts) + ')'
         except: pass
-    raise NameError('UxADT error: module cannot be found in global scope. '+\
+    raise NameError('UxADT error: module cannot be found in the scope. '+\
                       'Please ensure that the module is being imported correctly.')
 
 def qualified(arg1, arg2 = None):

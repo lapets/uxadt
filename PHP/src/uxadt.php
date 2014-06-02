@@ -33,7 +33,7 @@ class Matching {
   }
 
   // Matching function.
-  public function _ ($p, $f) { return $this->match($p, $f); }
+  public function _($p, $f) { return $this->match($p, $f); }
   public function match($p, $f) {
     return ($this->candidate == null) ? new Matching(null, $this->end) : $this->candidate->match($p, $f);
   }
@@ -64,7 +64,7 @@ class Value {
     // Compare the constructors and recursively check equality.
     foreach (get_object_vars($this) as $c => $cc) {
       foreach (get_object_vars($that) as $d => $dd) {
-        if ($c[0] != '_' && $c[1] != '_' && $d[0] != '_' && $d[1] != '_') {
+        if ($c[0]!='_' && (strlen($c)<2 || $c[1]!='_') && $d[0]!='_' && (strlen($d)<2 || $d[1]!='_')) {
           if ($c == $d && count($cc) == count($dd)) {
             for ($i = 0; $i < count($cc); $i++)
               if (!($cc[$i]->equal($dd[$i])))
@@ -76,7 +76,7 @@ class Value {
         }
       }
     }
-    return 0;
+    return 0; // Failure.
   }
 
   // Pattern matching unification algorithm.
@@ -87,12 +87,12 @@ class Value {
     // Compare the constructors and recursively unify if they match.
     foreach (get_object_vars($p) as $c => $cc) {
       foreach (get_object_vars($v) as $d => $dd) {
-        if ($c[0] != '_' && $c[1] != '_' && $d[0] != '_' && $d[1] != '_') {
+        if ($c[0]!='_' && (strlen($c)<2 || $c[1]!='_') && $d[0]!='_' && (strlen($d)<2 || $d[1]!='_')) {
           if ($c == $d && count($cc) == count($dd)) {
             $substs = array();
             for ($i = 0; $i < count($cc); $i++) {
               $subst = Value::unify($cc[$i], $dd[$i]);
-              if ($subst == null)
+              if (!is_array($subst))
                 return null;
               $substs = array_merge($substs, $subst);
             }
@@ -140,8 +140,7 @@ class Value {
     if (count($args) == 1) {
       $label = $args[0];
       return array_key_exists($label, $this->__at__) ? $this->__at__[$label] : null;
-    }
-    else if (count($args) == 2) {
+    } else if (count($args) == 2) {
       list($label, $proj) = $args;
       $this->__at__[$label] = $proj;
       return $this;
@@ -154,7 +153,7 @@ class Value {
     $s = "";
     $ss = array();
     foreach (get_object_vars($this) as $c => $cc) {
-      if (!(strlen($c) >= 2 && $c[0] == '_' && $c[1] == '_')) {
+      if ($c[0] != '_' && (strlen($c) < 2 || $c[1] != '_')) {
         for ($i = 0; $i < count($cc); $i++)
           array_push($ss, $cc[$i]->toData());
         return array($c => $ss);
@@ -168,7 +167,7 @@ class Value {
     $s = "";
     $ss = array();
     foreach (get_object_vars($this) as $c => $cc) {
-      if (!(strlen($c) >= 2 && $c[0] == '_' && $c[1] == '_')) {
+      if ($c[0] != '_' && (strlen($c) < 2 || $c[1] != '_')) {
         $s = $c . '(';
         foreach ($cc as $v)
           array_push($ss, $v->toString());
@@ -179,12 +178,12 @@ class Value {
 }
 
 /********************************************************************
-** Functions for defining algebraic data type constructors. There are
-** two ways techniques supported for introducing constructors:
+** Functions for defining algebraic data type constructors. There
+** are two ways techniques supported for introducing constructors:
 **  * defining them in the local scope as stand-alone, unqualified
 **    functions by passing the definition string to eval();
-**  * defining a named object that has the named constructors as its
-**    only methods.
+**  * defining a named class or object that has the named 
+**    constructors as its only methods.
 */
 
 function unqualified($sigs) {
@@ -193,7 +192,7 @@ function unqualified($sigs) {
   $defs =
       "if (!(class_exists('\\uxadt\\Value')))"
     . "throw new ErrorException('"
-    . "UxADT error: module cannot be found in global scope."
+    . "UxADT error: module cannot be found in the scope."
     . "Please ensure that the module is being imported correctly."
     . "');";
   foreach ($sigs as $con => $args)

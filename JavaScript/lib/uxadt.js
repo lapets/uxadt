@@ -14,76 +14,206 @@
 
 (function (_, uxadt) {
 
-  "use strict";
+  // "use strict";
 
-  // Wildcard pattern is _.
-  uxadt._ = _;
+  /******************************************************************
+  ** Data structure for maintaining the state of a chained matching
+  ** expression. It must support the same matching interface as the
+  ** one supported by values.
+  */
 
-  // Representation for individual algebraic data type values
-  // and value patterns.
-  uxadt.Value = function() {};
+  // Constructor.
+  uxadt.Matching = 
+    function (candidate, end) {
+      if (end == null)
+        this.candidate = candidate;
+      else
+        this.end = end;
+    };
 
-  // Pattern matching unification algorithm.
-  uxadt.unify = 
-    function (p, v) {
-      if (p == uxadt._)
-        return [v];
+  // Matching function.
+  uxadt.Matching.prototype.match =
+    function (p, f) {
+      return (this.candidate == null) ? uxadt.Matching(null, this.end) : this.candidate.match(p, f);
+    };
+  uxadt.Matching.prototype._ = uxadt.Matching.prototype.match;
 
-      for (var c in p) {
-        for (var d in v) {
-          if ( !(c in uxadt.Value.prototype) 
-            && !(d in uxadt.Match.prototype) 
-            && c == d 
-            && p[c].length == v[d].length
+  /******************************************************************
+  ** Every UxADT value (i.e., instance of a data structure) and every
+  ** UxADT pattern is represented as a Value object.
+  */
+
+  // Constructor.
+  uxadt.Value =
+    function(cons) {
+      this.__at__ = {};
+      this.__last__ = null;
+
+      for (var con in cons)
+        this[con] = cons[con];
+    };
+
+  // Structural equality.
+  uxadt.Value.prototype.equal =
+    function (that) {
+      // If we are using stateful match storage, clean up
+      // in case there is anything left over.
+      this.__last__ = null;
+
+      // Compare the constructors and recursively check equality.
+      for (var c in this) {
+        for (var d in that) {
+          if ( !(c in uxadt.Value.prototype) && !(d in uxadt.Matching.prototype)
+            && (c[0]!='_' && (c.length<2 || c[1]!='_') && d[0]!='_' && (d.length<2 || d[1]!='_'))
              ) {
-            var substs = [];
-            for (var i = 0; i < p[c].length; i++) {
-              var subst = uxadt.unify(p[c][i], v[d][i]);
-              if (subst == null)
-                return null;
-              substs = substs.concat(subst);
+            if (c == d && this[c].length == that[d].length) {
+              for (var i = 0; i < this[c].length; i++)
+                if (!(uxadt.Value.prototype.equal(this[c][i], that[d][i])))
+                  return false;
+              return true;
+            } else {
+              return false;
             }
-            return substs;
           }
         }
       }
-      return null; // Failure.
-    }
-
-  // Constructor and interface for pattern matching results.
-  uxadt.Match = 
-    function (value) {
-      this.isMatch = true;
-      this.end = value;
+      return false; // Failure.
     };
 
-  uxadt.Match.prototype.match =
-    function (p, f) {
-      return this;
-    }
-  uxadt.Match.prototype._ = uxadt.Match.prototype.match;
+  // Pattern matching unification algorithm.
+  uxadt.Value.prototype.unify =
+    function (p, v) {
+      if (!(p instanceof uxadt.Value) || p == null)
+        return [v];
 
-  // Interface for matching algebraic data type values.
+      // Compare the constructors and recursively unify if they match.
+      for (var c in p) {
+        for (var d in v) {
+          if ( !(c in uxadt.Value.prototype) && !(d in uxadt.Matching.prototype)
+            && (c[0]!='_' && (c.length<2 || c[1]!='_') && d[0]!='_' && (d.length<2 || d[1]!='_'))
+             ) {
+            if (c == d && p[c].length == v[d].length) {
+              var substs = [];
+              for (var i = 0; i < p[c].length; i++) {
+                var subst = uxadt.Value.prototype.unify(p[c][i], v[d][i]);
+                if (subst == null)
+                  return null;
+                substs = substs.concat(subst);
+              }
+              return substs;
+            } else {
+              return null;
+            }
+          }
+        }
+      }
+      return null;
+    };
+
+  // Matching function.
   uxadt.Value.prototype.match =
     function (p, f) {
-      var subst = uxadt.unify(p, this);
-      return (subst != null) ? new uxadt.Match(f.apply(f, subst)) : this;
-    }
+      // If we are using stateful match storage, clean up
+      // in case there is anything left over.
+      this.__last__ = null;
+    
+      var subst = uxadt.Value.prototype.unify(p, this);
+      if (f == null) {
+        if (subst != null && subst.length > 0)
+          this.__last__ = subst;
+        return subst != null;
+      } else {
+        return new uxadt.Matching(this, (subst == null) ? null : f.apply(f, subst));
+      }
+    };
   uxadt.Value.prototype._ = uxadt.Value.prototype.match;
 
-  // Algebraic data type value constructor.
-  uxadt.constructor = function (name) {
-    return (
-        function () {
-          var value = new uxadt.Value();
-          value[name] = [];
-          for (var i = 0; i < arguments.length; i++)
-            value[name].push(arguments[i]);
-          return value;
-        }
-      );
-  }
+  // Last match retrieval when using stateful matching.
+  uxadt.Value.prototype.matched =
+    function matched() {
+      if (this.__last__ != null) {
+        var tmp = this.__last__;
+        this.__last__ = null;
+        return tmp;
+      }
+      // throw error ('UxADT error: can only traverse result of match exactly once after a match has occurred.');
+    };
 
+  // Setting and getting labeled projections.
+  uxadt.Value.prototype.at =
+    function () {
+      if (arguments.length == 1) {
+        var label = arguments[0];
+        return this.__at__[label] != null ? this.__at__[label] : null;
+      } else if (arguments.length == 2) {
+        var label = arguments[0], proj = arguments[1];
+        this.__at__[label] = proj;
+        return this;
+      }
+      return this;
+    };
+
+  // Rendering as a native nested data structure.
+  uxadt.Value.prototype.toData =
+    function () {
+      var s = "";
+      var ss = [];
+      for (c in this) {
+        if (!(c in uxadt.Value.prototype) && (c[0]!='_' && (c.length<2 || c[1]!='_'))) {
+          for (var i = 0; i < this[c].length; i++)
+            ss.push(this[c].toData());
+          var o = {};
+          o[c] = ss;
+          return o;
+        }
+      }
+    };
+
+  // Rendering as a string.
+  uxadt.Value.prototype.toString =
+    function () {
+      var s = "";
+      for (c in this) {
+        if (!(c in uxadt.Value.prototype) && (c[0]!='_' && (c.length<2 || c[1]!='_'))) {
+          s = c + '(';
+          for (var i = 0; i < this[c].length; i++)
+            s = s + (i > 0 ? ', ' : '') + this[c][i].toString();
+          return s + ')';
+        }
+      }
+    };
+  
+  /******************************************************************
+  ** Functions for defining algebraic data type constructors. There
+  ** are two ways techniques supported for introducing constructors:
+  **  * defining them in the local scope as stand-alone, unqualified
+  **    functions by passing the definition string to eval();
+  **  * defining a named class or object that has the named 
+  **    constructors as its only methods.
+  */
+
+  uxadt.unqualified =
+    function (sigs) {
+      // Since emitted code will refer to UxADT operations
+      // by name, the module must be defined in the scope.
+      var defs =
+          "if (typeof uxadt.Value === 'undefined') "
+        + "throw '"
+        + "UxADT error: module cannot be found in the scope."
+        + "Please ensure that the module is being imported correctly."
+        + "';";
+      defs = '';
+      for (con in sigs)
+        defs = defs + con + ' = function() { var v = new uxadt.Value(); value["' + con + '"] = arguments; return v; };';
+      return defs;
+    };
+  
+  uxadt.qualified =
+    function (arg1, arg2) {
+    
+    };
+
+  /*
   // Function for introducing a new algebraic data type
   // (can introduce constructors into specified scope).
   uxadt.definition = function () {
@@ -104,71 +234,10 @@
 
     return obj;
   }
+  */
 
-  uxadt.define = uxadt.definition;
+  uxadt.definition = uxadt.unqualified;
+  uxadt._ = uxadt.unqualified;
 
-//})(typeof exports !== 'undefined' ? exports : (this.uxadt = {}));
-//})(this.uxadt = (function(){}));
-})(_, this.uxadt = 
-
-  // Extensions on existing prototypes for handling common operations
-  // on container types that may hold UxADT Values.
-
-  function __uxadt__(obj) {
-
-    // Return a new, wrapped object on which UxADT functions are defined.
-    var self = this;
-    obj = obj == null ? self : obj;
-
-    // Apply the function to the first element in an array that matches
-    // the specified pattern (i.e., a 'find' operation) and returns a
-    // non-null result value.
-    obj.find =
-      function (p, f) {
-        for (var i = 0; i < obj.length; i++) {
-          var value = obj[i]._(p, f).end;
-          if (value != null)
-            return value;
-        }
-        return null;
-      };
-
-    // Return a new array containing the NON-NULL results of applying 
-    // the specified function to each element in the input array that
-    // matches the specified pattern (i.e., a 'filter' operation
-    // and a 'map' operation).
-    obj.map =
-      function (p, f) {
-        var a = [];
-        for (var i = 0; i < obj.length; i++) {
-          var value = obj[i]._(p, f).end;
-          if (value != null)
-            a.push(value);
-        }
-        return uxadt(a);
-      };
-
-    return obj;
-  }
-);
-
-/////////////////////////////////////////////////////////////////////
-// Useful global synonyms.
-
-if (typeof _ == 'undefined')
-  var _ = null;
-
-/*
-// Example.
-function hgt(t) {
-  return t
-     ._(Leaf(), function(){
-          return 1;
-       })
-     ._(Node(_, _), function(x, y){
-          return hgt(x) + hgt(y);
-       })
-     .end;
-}*/
-
+})(typeof exports !== 'undefined' ? exports : (this.uxadt = {}));
 /* eof */
