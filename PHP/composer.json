@@ -1,5 +1,5 @@
 {
-    "name": "uxadt",
+    "name": "uxadt/uxadt",
     "type": "library",
     "description": "Universal (cross-language) extensible representation for algebraic data type instances.",
     "homepage": "http://uxadt.org",
