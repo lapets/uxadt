@@ -1,13 +1,13 @@
 {
   "name": "uxadt",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Andrei Lapets <lapets@bu.edu>",
   "description": "Universal extensible representation for algebraic data types.",
   "repository": {
       "type": "git",
       "url": "https://github.com/lapets/uxadt" 
     },
-  "homepage": "http://www.uxadt.org",
+  "homepage": "http://uxadt.org",
   "keywords": [
       "algebraic", "data", "types", "datatypes", 
 	  "functional", "case", "match", "pattern",

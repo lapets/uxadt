@@ -9,4 +9,4 @@ Universal (cross-language) extensible representation for algebraic data type ins
    matching) on algebraic data type values.
 
    Web:     uxadt.org
-   Version: 0.0.0.2
+   Version: 0.0.4.0

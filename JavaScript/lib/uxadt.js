@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.3
+**   Version: 0.0.4
 **
 */
 
