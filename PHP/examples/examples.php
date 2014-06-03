@@ -14,15 +14,15 @@ define('_', null);
 ** Defining constructors in the local scope as stand-alone functions.
 */
 
-eval(\uxadt\_(array(
+\uxadt\_(array(
     'Red' => array(),
     'Blue' => array()
-  )));
+  ));
 
-eval(\uxadt\_(array(
+\uxadt\_(array(
     'Node' => array(_, _),
     'Leaf' => array()
-  )));
+  ));
 
 $c0 = Red();
 $t0 = Node(Node(Leaf(), Leaf()), Node(Leaf(), Leaf()));
@@ -39,7 +39,7 @@ function size($t) {
 print "Example #1\n";
 print $t0 . "\n";
 print_r($t0->toData()); print "\n";
-$t0->at('size', size($t0));
+$t0 = $t0->at('size', size($t0));
 print $t0->at('size') . "\n";
 print "\n";
 

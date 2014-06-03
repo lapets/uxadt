@@ -195,6 +195,12 @@
 
   uxadt.unqualified =
     function (sigs) {
+      // Since emitted code will refer to UxADT operations
+      // by name, the module must be defined in the scope.
+      if (typeof uxadt.Value === 'undefined')
+        throw "UxADT error: module cannot be found in the scope."
+            + "Please ensure that the module is being imported correctly.";
+
       // Obtain the global context (Node.js or browser).
       var context = (typeof window === 'undefined' ? global : window);
 

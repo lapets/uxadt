@@ -45,14 +45,15 @@ class Matching {
 */
 
 class Value {
+  private $__ty__ = null;
   private $__at__ = array();
   private $__last__ = null;
 
   // Constructor.
-  public function __construct() {
-    foreach (func_get_args() as $arg)
-      foreach ($arg as $con => $args)
-        $this->$con = $args;
+  public function __construct($sigs, $ty = null) {
+    foreach ($sigs as $con => $args)
+      $this->$con = $args;
+    $this->__ty__ = $ty;
   }
 
   // Structural equality.
@@ -168,7 +169,7 @@ class Value {
     $ss = array();
     foreach (get_object_vars($this) as $c => $cc) {
       if ($c[0] != '_' && (strlen($c) < 2 || $c[1] != '_')) {
-        $s = $c . '(';
+        $s = (($this->__ty__ != null) ? $this->__ty__ . '.' : '') . $c . '(';
         foreach ($cc as $v)
           array_push($ss, $v->toString());
         return $s . implode(", ", $ss) . ')';
@@ -195,29 +196,36 @@ function unqualified($sigs) {
     . "UxADT error: module cannot be found in the scope."
     . "Please ensure that the module is being imported correctly."
     . "');";
+
+  // Define the constructors as unqualified globals.
   foreach ($sigs as $con => $args)
-    $defs .= 'function '.$con.' () { $v = new \\uxadt\\Value; $v->'.$con.' = func_get_args(); return $v; };';
-  return $defs;
+    $defs .= 'function '.$con.' () { $v = new \\uxadt\\Value(array("'.$con.'" => func_get_args())); return $v; };';
+  eval($defs);
 }
 
 function qualified($arg1, $arg2 = null) {
+  // If a qualifier was supplied explicitly as the first argument,
+  // use it; otherwise, make a qualifier using the names of the
+  // constructors.
   if ($arg2 == null) {
-    // No explicit name provided; only the
-    // returned object will be used.
     $sigs = $arg1;
     $name = "_Type";
     foreach ($sigs as $con => $args)
       $name .= "_" . $con;
   } else {
-    // New global class declaration will be executed.
     $sigs = $arg2;
     $name = $arg1;
   }
+
+  // Create the class that has the constructors as named static methods.
   $defs = "class " . $name . "{ ";
   foreach ($sigs as $con => $args)
-    $defs .= "public static function " . $con . "() { return new \\uxadt\\Value(array('" . $con . "' => func_get_args())); } ";
-  $defs .= ' }; $t = new ' . $name . '();';
+    $defs .= "public static function " . $con . "() { return new \\uxadt\\Value(array('" . $con . "' => func_get_args()), '" . $name . "'); } ";
+  $defs .= ' };';
+
+  // Make the named object available in the global context and also return an object of that class.
   eval($defs);
+  eval('$t = new ' . $name . '();');
   return $t;
 }
 
