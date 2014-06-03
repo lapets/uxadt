@@ -40,12 +40,14 @@ class Matching():
 ##
 
 class Value():
+    __ty__ = None
     __at__ = {}
     __last__ = None
 
     # Constructor.
-    def __init__(self, entries):
+    def __init__(self, entries, ty = None):
         self.__dict__.update(entries)
+        self.__ty__ = ty
 
     # Structural equality.
     def __eq__(v, w): return v.equal(w)
@@ -136,7 +138,8 @@ class Value():
     def toString(self):
         for c in self.__dict__:
             if c[0:2] != '__':
-                return c + '(' + ', '.join([v.toString() for v in self.__dict__[c]]) + ')'
+                return (self.__ty__ + '.' if self.__ty__ != None else '') +\
+                       c + '(' + ', '.join([v.toString() for v in self.__dict__[c]]) + ')'
 
 #####################################################################
 ## Functions for defining algebraic data type constructors. There
@@ -154,12 +157,15 @@ def unqualified(sigs):
     import inspect
     from types import ModuleType
     frame = inspect.currentframe()
+    context = inspect.currentframe().f_back.f_globals
     for name in frame.f_back.f_locals:
         try:
             if type(frame.f_back.f_locals[name]) == ModuleType and frame.f_back.f_locals[name].Value == Value:
                 stmts = []
                 stmts += [con + " = lambda *args, **kwargs: "+name+".Value({'" + con + "': args})" for con in sigs]
                 stmts = ['exec("' + s + '")' for s in stmts]
+                for con in sigs:
+                  context[con] = eval("lambda *args, **kwargs: Value({'" + con + "': args})")
                 return '(' + ",".join(stmts) + ')'
         except: pass
     for name in frame.f_globals:
@@ -168,10 +174,12 @@ def unqualified(sigs):
                 stmts = []
                 stmts += [con + " = lambda *args, **kwargs: " + name + "({'" + con + "': args})" for con in sigs]
                 stmts = ['exec("' + s + '")' for s in stmts]
+                for con in sigs:
+                  context[con] = eval("lambda *args, **kwargs: Value({'" + con + "': args})")
                 return '(' + ",".join(stmts) + ')'
         except: pass
     raise NameError('UxADT error: module cannot be found in the scope. '+\
-                      'Please ensure that the module is being imported correctly.')
+                    'Please ensure that the module is being imported correctly.')
 
 def qualified(arg1, arg2 = None):
     class _Type(object):
@@ -185,7 +193,7 @@ def qualified(arg1, arg2 = None):
         sigs = arg2
         name = arg1
 
-    cls = type(name, (_Type,), {con: eval("lambda *args: Value({'"+con+"': args})") for con in sigs}) 
+    cls = type(name, (_Type,), {con: eval("lambda *args: Value({'"+con+"': args}, '" + name + "')") for con in sigs}) 
     try:
         import inspect
         inspect.currentframe().f_back.f_globals[name] = cls
