@@ -14,15 +14,15 @@ _ = None
 ## Defining constructors in the local scope as stand-alone functions.
 ##
 
-eval(uxadt._({\
+uxadt._({\
     'Red': [],\
     'Blue': []\
-    }))
+    })
 
-eval(uxadt._({\
+uxadt._({\
     'Node': [_, _],\
     'Leaf': []\
-    }))
+    })
 
 c0 = Red()
 t0 = Node(Node(Leaf(), Leaf()), Node(Leaf(), Leaf()))
@@ -61,7 +61,7 @@ print("")
 ## Defining a named object that has the constructors as its methods.
 ##
 
-Color = uxadt.qualified({\
+Color = uxadt.qualified('Color', {\
     'Red': [],\
     'Blue': []\
     })

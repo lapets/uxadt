@@ -71,7 +71,7 @@
   ** Defining a named object that has the constructors as its methods.
   */
 
-  uxadt.qualified('Color', {
+  var Color = uxadt.qualified('Color', {
       'Red': [],
       'Blue': []
     });
