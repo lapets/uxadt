@@ -1,6 +1,6 @@
 {
   "name": "uxadt",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Andrei Lapets <lapets@bu.edu>",
   "description": "Universal extensible representation for algebraic data types.",
   "repository": {
