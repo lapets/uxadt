@@ -26,11 +26,17 @@ The directory structure and locations of noteworthy files are as follows:
   - `/JavaScript/lib/uxadt.js`
   The source of the JavaScript version of the library.
 
+  - `/JavaScript/examples/`
+  Examples illustrating how the library can be used with Node.js and HTML.
+
 * `/PHP/`
   The PHP version of the library, ready for packaging and publication.
 
-  - `/PHP/uxadt.php`
+  - `/PHP/src/uxadt.php`
   The source of the PHP version of the library.
+
+  - `/PHP/examples/`
+  Examples illustrating how the library can be used in PHP.
 
 * `/Python/`
   The Python version of the library, ready for packaging and publication.
@@ -40,3 +46,6 @@ The directory structure and locations of noteworthy files are as follows:
 
   - `/Python/uxadt/uxadt.py`
   The source of the Python version of the library.
+
+  - `/Python/examples/`
+  Examples illustrating how the library can be used in Python.
