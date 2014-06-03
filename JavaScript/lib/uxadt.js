@@ -12,9 +12,9 @@
 **
 */
 
-(function (_, uxadt) {
+(function (uxadt) {
 
-  // "use strict";
+  "use strict";
 
   /******************************************************************
   ** Data structure for maintaining the state of a chained matching
@@ -23,7 +23,7 @@
   */
 
   // Constructor.
-  uxadt.Matching = 
+  uxadt.Matching =
     function (candidate, end) {
       if (end == null)
         this.candidate = candidate;
@@ -34,7 +34,7 @@
   // Matching function.
   uxadt.Matching.prototype.match =
     function (p, f) {
-      return (this.candidate == null) ? uxadt.Matching(null, this.end) : this.candidate.match(p, f);
+      return (this.candidate == null) ? this : this.candidate.match(p, f);
     };
   uxadt.Matching.prototype._ = uxadt.Matching.prototype.match;
 
@@ -46,6 +46,7 @@
   // Constructor.
   uxadt.Value =
     function(cons) {
+      this.__ty__ = null;
       this.__at__ = {};
       this.__last__ = null;
 
@@ -158,10 +159,10 @@
     function () {
       var s = "";
       var ss = [];
-      for (c in this) {
+      for (var c in this) {
         if (!(c in uxadt.Value.prototype) && (c[0]!='_' && (c.length<2 || c[1]!='_'))) {
           for (var i = 0; i < this[c].length; i++)
-            ss.push(this[c].toData());
+            ss.push(this[c][i].toData());
           var o = {};
           o[c] = ss;
           return o;
@@ -173,9 +174,9 @@
   uxadt.Value.prototype.toString =
     function () {
       var s = "";
-      for (c in this) {
+      for (var c in this) {
         if (!(c in uxadt.Value.prototype) && (c[0]!='_' && (c.length<2 || c[1]!='_'))) {
-          s = c + '(';
+          s = (this.__ty__ != null ? this.__ty__ + '.' : '') + s + c + '('
           for (var i = 0; i < this[c].length; i++)
             s = s + (i > 0 ? ', ' : '') + this[c][i].toString();
           return s + ')';
@@ -194,47 +195,42 @@
 
   uxadt.unqualified =
     function (sigs) {
-      // Since emitted code will refer to UxADT operations
-      // by name, the module must be defined in the scope.
-      var defs =
-          "if (typeof uxadt.Value === 'undefined') "
-        + "throw '"
-        + "UxADT error: module cannot be found in the scope."
-        + "Please ensure that the module is being imported correctly."
-        + "';";
-      defs = '';
-      for (con in sigs)
-        defs = defs + con + ' = function() { var v = new uxadt.Value(); value["' + con + '"] = arguments; return v; };';
-      return defs;
+      // Obtain the global context (Node.js or browser).
+      var context = (typeof window === 'undefined' ? global : window);
+
+      // Define the constructors as unqualified globals.
+      for (var con in sigs)
+        context[con] = eval('var f = function () { var v = new uxadt.Value(); v["' + con + '"] = arguments; return v; }; f');
     };
-  
+
   uxadt.qualified =
     function (arg1, arg2) {
-    
+      // Obtain the global context (Node.js or browser).
+      var context = (typeof window === 'undefined' ? global : window);
+
+      // If a qualifier was supplied explicitly as the first argument,
+      // use it; otherwise, make a qualifier using the names of the
+      // constructors.
+      var sigs, name;
+      if (arg2 == null) {
+        sigs = arg1;
+        name = '_Type';
+        for (var con in sigs)
+          name = name + '_' + con;
+      } else {
+        sigs = arg2;
+        name = arg1;
+      }
+      
+      // Create the object that has the constructors as named methods.
+      var o = {};
+      for (var con in sigs)
+        o[con] = eval('var f = function () { var v = new uxadt.Value(); v.__ty__ = name; v["' + con + '"] = arguments; return v; }; f');
+        
+      // Make the named object available in the global context and also return it.
+      context[name] = o;
+      return o;
     };
-
-  /*
-  // Function for introducing a new algebraic data type
-  // (can introduce constructors into specified scope).
-  uxadt.definition = function () {
-    var cases, obj;
-    if (arguments.length == 1) {
-      // Build a string to use with eval().
-      obj = "";
-      cases = arguments[0];
-      for (var con in cases)
-        obj += con + "=uxadt.constructor(con);";
-    } else if (arguments.length == 2) {
-      // Define constructors as members of the supplied object.
-      obj = arguments[0];
-      cases = arguments[1];
-      for (var con in cases)
-        obj[con] = (cases[con].length == 0) ? uxadt.constructor(con) : uxadt.constructor(con);
-    }
-
-    return obj;
-  }
-  */
 
   uxadt.definition = uxadt.unqualified;
   uxadt._ = uxadt.unqualified;
