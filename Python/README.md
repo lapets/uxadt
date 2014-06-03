@@ -1,5 +1,7 @@
+uxadt.py
+========
 
-  uxadt.py
+Universal (cross-language) extensible representation for algebraic data type instances.
 
    A library that supports a universal, cross-platform embedded
    representation for algebraic data type (ADT) values, and a
@@ -7,4 +9,4 @@
    matching) on algebraic data type values.
 
    Web:     uxadt.org
-   Version: 0.0.0.5
+   Version: 0.0.4.0

@@ -8,7 +8,7 @@
 ##   matching) on algebraic data type values.
 ##
 ##   Web:     uxadt.org
-##   Version: 0.0.3.0
+##   Version: 0.0.4.0
 ##
 ##
 
@@ -151,13 +151,14 @@ class Value():
 ##
 
 def unqualified(sigs):
-    # Since emitted code will refer to uxadt operations
-    # by name, the module must be defined in the scope.
-    # Find the module name and return the code to evaluate.
-    import inspect
     from types import ModuleType
+
+    # Obtain the global context.
+    import inspect
     frame = inspect.currentframe()
     context = inspect.currentframe().f_back.f_globals
+
+    # Define the constructors as unqualified globals.
     for name in frame.f_back.f_locals:
         try:
             if type(frame.f_back.f_locals[name]) == ModuleType and frame.f_back.f_locals[name].Value == Value:
@@ -178,14 +179,17 @@ def unqualified(sigs):
                   context[con] = eval("lambda *args, **kwargs: Value({'" + con + "': args})")
                 return '(' + ",".join(stmts) + ')'
         except: pass
+
+    # Since emitted code will refer to uxadt operations
+    # by name, the module must be defined in the scope.
+    # Find the module name and return the code to evaluate.
     raise NameError('UxADT error: module cannot be found in the scope. '+\
                     'Please ensure that the module is being imported correctly.')
 
 def qualified(arg1, arg2 = None):
-    class _Type(object):
-        def __init__(self, cons):
-            self.__dict__.update(cons)
-
+    # If a qualifier was supplied explicitly as the first argument,
+    # use it; otherwise, make a qualifier using the names of the
+    # constructors.
     if arg2 == None:
         sigs = arg1
         name = '_Type' + "_".join([con for con in sigs])
@@ -193,7 +197,13 @@ def qualified(arg1, arg2 = None):
         sigs = arg2
         name = arg1
 
+    # Create the class that has the constructors as named static methods.
+    class _Type(object):
+        def __init__(self, cons):
+            self.__dict__.update(cons)
     cls = type(name, (_Type,), {con: eval("lambda *args: Value({'"+con+"': args}, '" + name + "')") for con in sigs}) 
+    
+    # Make the named class available in the global context and also return it.
     try:
         import inspect
         inspect.currentframe().f_back.f_globals[name] = cls
