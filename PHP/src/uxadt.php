@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.3.0
+**   Version: 0.0.4.0
 **
 */
 
@@ -223,7 +223,7 @@ function qualified($arg1, $arg2 = null) {
     $defs .= "public static function " . $con . "() { return new \\uxadt\\Value(array('" . $con . "' => func_get_args()), '" . $name . "'); } ";
   $defs .= ' };';
 
-  // Make the named object available in the global context and also return an object of that class.
+  // Make the named object of that class available in the global context and also return it.
   eval($defs);
   eval('$t = new ' . $name . '();');
   return $t;
