@@ -169,7 +169,7 @@ class Value {
     $ss = array();
     foreach (get_object_vars($this) as $c => $cc) {
       if ($c[0] != '_' && (strlen($c) < 2 || $c[1] != '_')) {
-        $s = (($this->__ty__ != null) ? $this->__ty__ . '.' : '') . $c . '(';
+        $s = (($this->__ty__ != null) ? $this->__ty__ . '::' : '') . $c . '(';
         foreach ($cc as $v)
           array_push($ss, $v->toString());
         return $s . implode(", ", $ss) . ')';
