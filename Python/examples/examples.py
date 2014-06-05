@@ -17,12 +17,12 @@ _ = None
 uxadt._({\
     'Red': [],\
     'Blue': []\
-    })
+  })
 
 uxadt._({\
     'Node': [_, _],\
     'Leaf': []\
-    })
+  })
 
 c0 = Red()
 t0 = Node(Node(Leaf(), Leaf()), Node(Leaf(), Leaf()))
@@ -58,18 +58,18 @@ print(str(t0) + " has width " + str(width(t0)) + ".")
 print("")
 
 #####################################################################
-## Defining a named object that has the constructors as its methods.
+## Defining name-qualified constructors.
 ##
 
 Color = uxadt.qualified('Color', {\
     'Red': [],\
     'Blue': []\
-    })
+  })
 
 uxadt.qualified('Tree', {\
     'Node': [_, _],\
     'Leaf': []\
-    })
+  })
 
 c0 = Color.Red()
 t0 = Tree.Node(Tree.Node(Tree.Leaf(), Tree.Leaf()), Tree.Leaf())
@@ -84,6 +84,27 @@ def height(t):
 print("Example #3")
 print(c0)
 print(str(t0) + " has height " + str(height(t0)) + ".")
+print("")
+
+#####################################################################
+## Constructors wrapping values of other non-UxADT types.
+##
+
+uxadt._({\
+    'Just': [_],\
+    'Nothing': []\
+  })
+
+def unwrap(m):
+    return m._(Just(_), lambda x: x).end
+
+print("Example #4")
+print(unwrap(Just(123)))
+print(unwrap(Just('ABC')))
+print(unwrap(Just(Just(['a', 'b', 'c']))))
+print(Just(123).toData())
+print(Just('ABC').toData())
+print(Just(Just(['a', 'b', 'c'])).toData())
 print("")
 
 ##eof

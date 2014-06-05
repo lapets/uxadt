@@ -68,7 +68,7 @@
   console.log("");
 
   /******************************************************************
-  ** Defining a named object that has the constructors as its methods.
+  ** Defining name-qualified constructors.
   */
 
   var Color = uxadt.qualified('Color', {
@@ -99,6 +99,29 @@
   console.log("Example #3");
   console.log(c0.toString());
   console.log(t0.toString() + " has height " + height(t0) + ".");
+  console.log("");
+
+  /******************************************************************
+  ** Constructors wrapping values of other non-UxADT types.
+  */
+
+  uxadt._({
+      'Just': [_],
+      'Nothing': []
+    });
+
+  function unwrap(m) {
+    return m._(Just(_), function(x) { return x; }).end;
+  }
+
+  console.log("Example #4");
+  console.log(unwrap(Just(123)));
+  console.log(unwrap(Just('ABC')));
+  console.log(unwrap(Just(Just(['a', 'b', 'c']))));
+  console.log(Just(123).toData());
+  console.log(Just('ABC').toData());
+  console.log(Just(Just(['a', 'b', 'c'])).toData());
+  console.log("");
 
 })(typeof exports !== 'undefined' ? exports : (this.examples = {}));
 /* eof */

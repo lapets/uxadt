@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.5.0
+**   Version: 0.0.6.0
 **
 */
 
@@ -156,7 +156,7 @@ class Value {
     foreach (get_object_vars($this) as $c => $cc) {
       if ($c[0] != '_' && (strlen($c) < 2 || $c[1] != '_')) {
         for ($i = 0; $i < count($cc); $i++)
-          array_push($ss, $cc[$i]->toData());
+          array_push($ss, (is_a($cc[$i], '\uxadt\Value')) ? $cc[$i]->toData() : $cc[$i]);
         return array($c => $ss);
       }
     }
@@ -171,7 +171,7 @@ class Value {
       if ($c[0] != '_' && (strlen($c) < 2 || $c[1] != '_')) {
         $s = (($this->__ty__ != null) ? $this->__ty__ . '::' : '') . $c . '(';
         foreach ($cc as $v)
-          array_push($ss, $v->toString());
+          array_push($ss, (is_a($v, '\uxadt\Value')) ? $v->toString() : ''.$v);
         return $s . implode(", ", $ss) . ')';
       }
     }

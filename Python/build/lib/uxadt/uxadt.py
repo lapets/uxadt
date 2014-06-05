@@ -8,7 +8,7 @@
 ##   matching) on algebraic data type values.
 ##
 ##   Web:     uxadt.org
-##   Version: 0.0.5.0
+##   Version: 0.0.6.0
 ##
 ##
 
@@ -131,7 +131,10 @@ class Value():
     def toData(self):
         for c in self.__dict__:
             if c[0:2] != '__':
-                return {c: [v.toData() for v in self.__dict__[c]]}
+                return {c: [\
+                    v.toData() if type(v) == Value else v\
+                    for v in self.__dict__[c]\
+                    ]}
 
     # Rendering as a string.
     def __str__(self): return self.toString()
@@ -139,7 +142,7 @@ class Value():
         for c in self.__dict__:
             if c[0:2] != '__':
                 return (self.__ty__ + '.' if self.__ty__ != None else '') +\
-                       c + '(' + ', '.join([v.toString() for v in self.__dict__[c]]) + ')'
+                       c + '(' + ', '.join([str(v) for v in self.__dict__[c]]) + ')'
 
 #####################################################################
 ## Functions for defining algebraic data type constructors. There

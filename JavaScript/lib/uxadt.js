@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.5
+**   Version: 0.0.6
 **
 */
 
@@ -162,7 +162,7 @@
       for (var c in this) {
         if (!(c in uxadt.Value.prototype) && (c[0]!='_' && (c.length<2 || c[1]!='_'))) {
           for (var i = 0; i < this[c].length; i++)
-            ss.push(this[c][i].toData());
+            ss.push((this[c][i] instanceof uxadt.Value) ? this[c][i].toData() : this[c][i]);
           var o = {};
           o[c] = ss;
           return o;

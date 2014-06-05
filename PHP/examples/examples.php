@@ -61,7 +61,7 @@ print $t0 . " has width " . width($t0) . ".\n";
 print "\n";
 
 /********************************************************************
-** Defining a named object that has the constructors as its methods.
+** Defining name-qualified constructors.
 */
 
 $Color = \uxadt\qualified('Color', array(
@@ -89,6 +89,28 @@ function height($t) {
 print "Example #3\n";
 print $c0 . "\n";
 print $t0 . " has height " . height($t0) . ".\n";
+print "\n";
+
+/********************************************************************
+** Constructors wrapping values of other non-UxADT types.
+*/
+
+\uxadt\_(array(
+    'Just' => array(_),
+    'Nothing' => array()
+  ));
+
+function unwrap($m) {
+  return $m->_(Just(_), function($x) { return $x; })->end;
+}
+
+print "Example #4\n";
+print unwrap(Just(123)) . "\n";
+print unwrap(Just('ABC')) . "\n";
+print unwrap(Just(Just(array('a', 'b', 'c')))) . "\n";
+print_r(Just(123)->toData()); echo "\n";
+print_r(Just('ABC')->toData()); echo "\n";
+print_r(Just(Just(array('a', 'b', 'c')))->toData()); echo "\n";
 print "\n";
 
 /*eof*/ ?>
