@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<package packagerversion="1.9.4" version="2.0" xmlns="http://pear.php.net/dtd/package-2.0" xmlns:tasks="http://pear.php.net/dtd/tasks-1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pear.php.net/dtd/tasks-1.0
+    http://pear.php.net/dtd/tasks-1.0.xsd
+    http://pear.php.net/dtd/package-2.0
+    http://pear.php.net/dtd/package-2.0.xsd">
+ <name>uxadt</name>
+ <uri>http://uxadt.org/</uri>
+ <summary>Universal (cross-language) extensible representation for algebraic data type instances.</summary>
+ <description>Universal (cross-language) extensible representation for algebraic data type instances.</description>
+ <lead>
+  <name>A. Lapets</name>
+  <user>lapets</user>
+  <email>lapets@bu.edu</email>
+  <active>yes</active>
+ </lead>
+ <date>2014-06-28</date>
+ <time>18:51:20</time>
+ <version>
+  <release>0.0.6</release>
+  <api>0.0.6</api>
+ </version>
+ <stability>
+  <release>beta</release>
+  <api>beta</api>
+ </stability>
+ <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+ <notes>
+None.
+ </notes>
+ <contents>
+  <dir baseinstalldir="." name="/">
+   <file baseinstalldir="." md5sum="1f7928d86a3b20efcd957620ea3c05f7" name="uxadt.php" role="php" />
+  </dir>
+ </contents>
+ <dependencies>
+  <required>
+   <php>
+    <min>5.3</min>
+   </php>
+   <pearinstaller>
+    <min>1.5.6</min>
+   </pearinstaller>
+  </required>
+ </dependencies>
+ <phprelease />
+ <changelog>
+  <release>
+   <version>
+    <release>0.0.6</release>
+    <api>0.0.6</api>
+   </version>
+   <stability>
+    <release>beta</release>
+    <api>beta</api>
+   </stability>
+   <date>2014-06-28</date>
+   <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
+   <notes>
+None.
+   </notes>
+  </release>
+ </changelog>
+</package>
