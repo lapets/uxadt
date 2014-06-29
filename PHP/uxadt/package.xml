@@ -6,7 +6,7 @@
  <name>uxadt</name>
  <uri>http://uxadt.org/</uri>
  <summary>Universal (cross-language) extensible representation for algebraic data type instances.</summary>
- <description>Universal (cross-language) extensible representation for algebraic data type instances.</description>
+ <description>A library that supports a universal, cross-platform embedded representation for algebraic data type (ADT) values, and a programming abstraction for operations (such as pattern matching) on algebraic data type values.</description>
  <lead>
   <name>A. Lapets</name>
   <user>lapets</user>
@@ -16,8 +16,8 @@
  <date>2014-06-28</date>
  <time>18:51:20</time>
  <version>
-  <release>0.0.6</release>
-  <api>0.0.6</api>
+  <release>0.0.8</release>
+  <api>0.0.8</api>
  </version>
  <stability>
   <release>beta</release>
@@ -46,8 +46,8 @@ None.
  <changelog>
   <release>
    <version>
-    <release>0.0.6</release>
-    <api>0.0.6</api>
+    <release>0.0.8</release>
+    <api>0.0.8</api>
    </version>
    <stability>
     <release>beta</release>
