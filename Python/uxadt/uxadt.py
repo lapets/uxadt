@@ -8,7 +8,7 @@
 ##   matching) on algebraic data type values.
 ##
 ##   Web:     uxadt.org
-##   Version: 0.0.8.0
+##   Version: 0.0.10.0
 ##
 ##
 
@@ -137,6 +137,7 @@ class Value():
                     ]}
 
     # Rendering as a string.
+    def __repr__(self): return self.toString()
     def __str__(self): return self.toString()
     def toString(self):
         for c in self.__dict__:
@@ -153,8 +154,12 @@ class Value():
 ##    constructors as its only methods.
 ##
 
-def unqualified(sigs):
+def unqualified(arg1, arg2 = None):
     from types import ModuleType
+
+    # If a name was supplied explicitly as the first argument,
+    # ignore it and use the second argument for the signatures.
+    sigs = arg1 if arg2 == None else arg2
 
     # Obtain the global context.
     import inspect

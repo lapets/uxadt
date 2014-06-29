@@ -19,8 +19,23 @@ uxadt._({\
     'Blue': []\
   })
 
-uxadt._({\
-    'Node': [_, _],\
+## The algebraic data type name is optional; the first argument
+## can be the type name, or it can be the dictionary defining the
+## constructors:
+##
+##   uxadt._('Tree', {\
+##       'Node': ['Tree', 'Tree'],\
+##       'Leaf': []\
+##     })
+##
+##   uxadt._({\
+##       'Node': [_, _],\
+##       'Leaf': []\
+##     })
+##
+  
+uxadt._('Tree', {\
+    'Node': ['Tree', 'Tree'],\
     'Leaf': []\
   })
 
