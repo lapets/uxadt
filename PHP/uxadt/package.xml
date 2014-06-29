@@ -13,11 +13,11 @@
   <email>lapets@bu.edu</email>
   <active>yes</active>
  </lead>
- <date>2014-06-28</date>
+ <date>2014-06-29</date>
  <time>18:51:20</time>
  <version>
-  <release>0.0.8</release>
-  <api>0.0.8</api>
+  <release>0.0.10</release>
+  <api>0.0.10</api>
  </version>
  <stability>
   <release>beta</release>
@@ -46,14 +46,14 @@ None.
  <changelog>
   <release>
    <version>
-    <release>0.0.8</release>
-    <api>0.0.8</api>
+    <release>0.0.10</release>
+    <api>0.0.10</api>
    </version>
    <stability>
     <release>beta</release>
     <api>beta</api>
    </stability>
-   <date>2014-06-28</date>
+   <date>2014-06-29</date>
    <license uri="http://www.opensource.org/licenses/mit-license.html">MIT</license>
    <notes>
 None.

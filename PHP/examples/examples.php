@@ -19,8 +19,23 @@ define('_', null);
     'Blue' => array()
   ));
 
+/* The algebraic data type name is optional; the first argument
+   can be the type name, or it can be the array defining the
+   constructors:
+   
+\uxadt\_('Tree', array(
+    'Node' => array('Tree', 'Tree'),
+    'Leaf' => array()
+  ));
+
 \uxadt\_(array(
     'Node' => array(_, _),
+    'Leaf' => array()
+  ));
+ */
+
+\uxadt\_('Tree', array(
+    'Node' => array('Tree', 'Tree'),
     'Leaf' => array()
   ));
 

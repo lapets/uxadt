@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.8.0
+**   Version: 0.0.10.0
 **
 */
 
@@ -187,7 +187,11 @@ class Value {
 **    constructors as its only methods.
 */
 
-function unqualified($sigs) {
+function unqualified($arg1, $arg2 = null) {
+  // If a name was supplied explicitly as the first argument,
+  // ignore it and use the second argument for the signatures.
+  $sigs = ($arg2 === null) ? $arg1 : $arg2;
+
   // Since emitted code will refer to UxADT operations
   // by name, the module must be defined in the scope.
   $defs =
@@ -207,7 +211,7 @@ function qualified($arg1, $arg2 = null) {
   // If a qualifier was supplied explicitly as the first argument,
   // use it; otherwise, make a qualifier using the names of the
   // constructors.
-  if ($arg2 == null) {
+  if ($arg2 === null) {
     $sigs = $arg1;
     $name = "_Type";
     foreach ($sigs as $con => $args)
@@ -230,7 +234,7 @@ function qualified($arg1, $arg2 = null) {
 }
 
 // Synonyms for the default technique.
-function definition($sigs) { return unqualified($sigs); }
-function _($sigs) { return unqualified($sigs); }
+function definition($arg1, $arg2) { return unqualified($arg1, $arg2); }
+function _($arg1, $arg2 = null) { return unqualified($arg1, $arg2); }
 
 /*eof*/ ?>
