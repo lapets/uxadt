@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.8
+**   Version: 0.0.10
 **
 */
 
@@ -194,7 +194,11 @@
   */
 
   uxadt.unqualified =
-    function (sigs) {
+    function (arg1, arg2) {
+      // If a name was supplied explicitly as the first argument,
+      // ignore it and use the second argument for the signatures.
+      var sigs = (arg2 == null) ? arg1 : arg2;
+
       // Since emitted code will refer to UxADT operations
       // by name, the module must be defined in the scope.
       if (typeof uxadt.Value === 'undefined')

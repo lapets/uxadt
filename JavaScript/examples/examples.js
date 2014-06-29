@@ -11,7 +11,7 @@
 
   "use strict";
 
-  var uxadt = require("./uxadt.js");
+  var uxadt = require("uxadt.js");
   var _ = null;
 
   /******************************************************************
@@ -23,8 +23,23 @@
       'Blue': []
     });
 
+  /* The algebraic data type name is optional; the first argument
+     can be the type name, or it can be the object defining the
+     constructors:
+   
+  uxadt._('Tree', {
+      'Node': ['Tree', 'Tree'],
+      'Leaf': []
+    });
+
   uxadt._({
       'Node': [_, _],
+      'Leaf': []
+    });
+   */
+
+  uxadt._('Tree', {
+      'Node': ['Tree', 'Tree'],
       'Leaf': []
     });
 
@@ -86,7 +101,7 @@
 
   function height(t) {
     if (t._(Tree.Leaf())) {
-      return 1;
+      return 0;
     } else if (t._(Tree.Node(_, _))) {
       // For compatibility with Node.js.
       var m = t.matched();
