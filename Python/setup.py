@@ -8,5 +8,6 @@ setup(
 	url              = 'http://uxadt.org',
 	author           = 'A. Lapets',
 	author_email     = 'lapets@bu.edu',
+    description = 'Universal (cross-language) extensible representation for algebraic data type instances.',
     long_description = open('README.txt').read(),
 )
