@@ -29,7 +29,7 @@ None.
  </notes>
  <contents>
   <dir baseinstalldir="." name="/">
-   <file baseinstalldir="." md5sum="1f7928d86a3b20efcd957620ea3c05f7" name="/uxadt/uxadt.php" role="php" />
+   <file baseinstalldir="." name="/uxadt/uxadt.php" role="php" />
   </dir>
  </contents>
  <dependencies>
