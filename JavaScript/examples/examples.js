@@ -11,7 +11,7 @@
 
   "use strict";
 
-  var uxadt = require("uxadt.js");
+  var uxadt = require("uxadt");
   var _ = null;
 
   /******************************************************************
