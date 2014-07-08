@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
     name             = 'UxADT',
-    version          = '0.0.12.0',
+    version          = '0.0.14.0',
     packages         = ['uxadt',],
     license          = 'MIT License',
 	url              = 'http://uxadt.org',
