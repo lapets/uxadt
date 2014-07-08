@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.10.0
+**   Version: 0.0.11.0
 **
 */
 
@@ -163,6 +163,21 @@ class Value {
   }
 
   // Rendering as a string.
+  static private function arrayToStringRecursive($xs) {
+    // Handle arrays by emitting explicit "array()" calls.
+    // TODO: Handle strings by escaping them properly and
+    // emitting quotation delimiters.
+    $ss = array();
+    foreach ($xs as $x) {
+      if (is_a($x, '\uxadt\Value'))
+        array_push($ss, $x->toString());
+      else if (is_array($x))
+        array_push($ss, arrayToStringRecursive($x));
+      else
+        array_push($ss, ''.$x);
+    }
+    return 'array(' . implode(", ", $ss) . ')';
+  }
   public function __toString() { return $this->toString(); }
   public function toString() {
     $s = "";
@@ -170,8 +185,14 @@ class Value {
     foreach (get_object_vars($this) as $c => $cc) {
       if ($c[0] != '_' && (strlen($c) < 2 || $c[1] != '_')) {
         $s = (($this->__ty__ != null) ? $this->__ty__ . '::' : '') . $c . '(';
-        foreach ($cc as $v)
-          array_push($ss, (is_a($v, '\uxadt\Value')) ? $v->toString() : ''.$v);
+        foreach ($cc as $v) {
+          if (is_a($v, '\uxadt\Value'))
+            array_push($ss, $v->toString());
+          else if (is_array($v))
+            array_push($ss, Value::arrayToStringRecursive($v));
+          else
+            array_push($ss, ''.$v);
+        }
         return $s . implode(", ", $ss) . ')';
       }
     }
@@ -207,29 +228,40 @@ function unqualified($arg1, $arg2 = null) {
   eval($defs);
 }
 
-function qualified($arg1, $arg2 = null) {
-  // If a qualifier was supplied explicitly as the first argument,
-  // use it; otherwise, make a qualifier using the names of the
-  // constructors.
-  if ($arg2 === null) {
+function qualified($arg1, $arg2 = null, $arg3 = null) {
+  // There are three supported possibilities for supplied arguments:
+  // * (<constructors>)
+  // * (<qualifier>, <constructors>)
+  // * (<namespace>, <qualifier>, <constructors>)
+  // We handle each case separately.
+  if ($arg2 === null && $arg3 === null) {
     $sigs = $arg1;
     $name = "_Type";
+    $ns = "";
     foreach ($sigs as $con => $args)
       $name .= "_" . $con;
-  } else {
+  } else if ($arg3 === null) {
     $sigs = $arg2;
     $name = $arg1;
+    $ns = "";
+  } else {
+    $sigs = $arg3;
+    $name = $arg2;
+    $ns = $arg1;
   }
 
+  $ns_decl = ($ns !== "") ? "namespace " . $ns . ";" : "";
+  $ns = ($ns !== "") ? "\\" . $ns . "\\" : "";
+
   // Create the class that has the constructors as named static methods.
-  $defs = "class " . $name . "{ ";
+  $defs = $ns_decl . "class " . $name . "{ ";
   foreach ($sigs as $con => $args)
-    $defs .= "public static function " . $con . "() { return new \\uxadt\\Value(array('" . $con . "' => func_get_args()), '" . $name . "'); } ";
+    $defs .= "public static function " . $con . "() { return new \\uxadt\\Value(array('" . $con . "' => func_get_args()), '" . $ns . $name . "'); } ";
   $defs .= ' };';
 
   // Make the named object of that class available in the global context and also return it.
   eval($defs);
-  eval('$t = new ' . $name . '();');
+  eval('$t = new ' . $ns . $name . '();');
   return $t;
 }
 

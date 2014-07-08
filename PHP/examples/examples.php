@@ -22,16 +22,16 @@ define('_', null);
 /* The algebraic data type name is optional; the first argument
    can be the type name, or it can be the array defining the
    constructors:
-   
-\uxadt\_('Tree', array(
-    'Node' => array('Tree', 'Tree'),
-    'Leaf' => array()
-  ));
 
-\uxadt\_(array(
-    'Node' => array(_, _),
-    'Leaf' => array()
-  ));
+     \uxadt\_('Tree', array(
+         'Node' => array('Tree', 'Tree'),
+         'Leaf' => array()
+       ));
+
+     \uxadt\_(array(
+         'Node' => array(_, _),
+         'Leaf' => array()
+       ));
  */
 
 \uxadt\_('Tree', array(
@@ -126,6 +126,19 @@ print unwrap(Just(Just(array('a', 'b', 'c')))) . "\n";
 print_r(Just(123)->toData()); echo "\n";
 print_r(Just('ABC')->toData()); echo "\n";
 print_r(Just(Just(array('a', 'b', 'c')))->toData()); echo "\n";
+print "\n";
+
+/********************************************************************
+** Declaring with namespaces.
+*/
+
+\uxadt\qualified('Geometry', 'Shape', array(
+    'Triangle' => array(),
+    'Square' => array()
+  ));
+
+print "Example #5\n";
+print \Geometry\Shape::Triangle() . "\n";
 print "\n";
 
 /*eof*/ ?>
