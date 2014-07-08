@@ -1,23 +1,33 @@
 {
   "name": "uxadt",
-  "version": "0.0.12",
-  "author": "Andrei Lapets <lapets@bu.edu>",
+  "version": "0.0.13",
+  "author": {
+    "name": "Andrei Lapets",
+    "email": "lapets@bu.edu"
+  },
   "description": "Universal extensible representation for algebraic data types.",
   "homepage": "http://uxadt.org",
   "repository": {
-      "type": "git",
-      "url": "https://github.com/lapets/uxadt" 
-    },
+    "type": "git",
+    "url": "https://github.com/lapets/uxadt"
+  },
   "bugs": {
     "url": "https://github.com/lapets/uxadt/issues"
   },
   "keywords": [
-      "algebraic", "data", "types", "datatypes", 
-	  "functional", "case", "match", "pattern",
-	  "unification"
-	],
+    "algebraic",
+    "data",
+    "types",
+    "datatypes",
+    "functional",
+    "case",
+    "match",
+    "pattern",
+    "unification"
+  ],
   "license": "MIT",
-  "main": "lib/richreports.js",
+  "readmeFilename": "README.md",
+  "main": "lib/uxadt.js",
   "dependencies": {},
   "analyze": false,
   "preferGlobal": false
