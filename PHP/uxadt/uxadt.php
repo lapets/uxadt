@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.12.0
+**   Version: 0.0.14.0
 **
 */
 
@@ -171,6 +171,8 @@ class Value {
     foreach ($xs as $x) {
       if (is_a($x, '\uxadt\Value'))
         array_push($ss, $x->toString());
+      else if (is_string($x)) 
+        array_push($ss, "'" . addslashes($x) . "'");
       else if (is_array($x))
         array_push($ss, arrayToStringRecursive($x));
       else
@@ -188,6 +190,8 @@ class Value {
         foreach ($cc as $v) {
           if (is_a($v, '\uxadt\Value'))
             array_push($ss, $v->toString());
+          else if (is_string($v)) 
+            array_push($ss, "'" . addslashes($v) . "'");
           else if (is_array($v))
             array_push($ss, Value::arrayToStringRecursive($v));
           else
