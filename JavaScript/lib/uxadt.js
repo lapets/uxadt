@@ -8,7 +8,7 @@
 **   matching) on algebraic data type values.
 **
 **   Web:     uxadt.org
-**   Version: 0.0.13
+**   Version: 0.0.14
 **
 */
 
@@ -171,19 +171,42 @@
     };
 
   // Rendering as a string.
+  uxadt.Value.prototype.arrayToStringRecursive =
+    function (a) {
+      var s = "";
+      for (var i = 0; i < a.length; i++) {
+        s += (i > 0 ? ', ' : '');
+        if (a[i] instanceof Array) {
+          s += uxadt.Value.prototype.arrayToStringRecursive(a[i]);
+        } else if (typeof a[i] == 'string' || a[i] instanceof String) {
+          s += JSON.stringify(a[i].quote());
+        } else {
+          s += a[i].toString();
+        }
+      }
+      return "[" + s + "]";
+    };
   uxadt.Value.prototype.toString =
     function () {
       var s = "";
       for (var c in this) {
         if (!(c in uxadt.Value.prototype) && (c[0]!='_' && (c.length<2 || c[1]!='_'))) {
           s = (this.__ty__ != null ? this.__ty__ + '.' : '') + s + c + '('
-          for (var i = 0; i < this[c].length; i++)
-            s = s + (i > 0 ? ', ' : '') + this[c][i].toString();
+          for (var i = 0; i < this[c].length; i++) {
+            s += (i > 0 ? ', ' : '');
+            if (this[c][i] instanceof Array) {
+              s += uxadt.Value.prototype.arrayToStringRecursive(this[c][i]);
+            } else if (typeof this[c][i] == 'string' || this[c][i] instanceof String) {
+              s += JSON.stringify(this[c][i]);
+            } else {
+              s += this[c][i].toString();
+            }
+          }
           return s + ')';
         }
       }
     };
-  
+
   /******************************************************************
   ** Functions for defining algebraic data type constructors. There
   ** are two ways techniques supported for introducing constructors:
@@ -194,19 +217,30 @@
   */
 
   uxadt.unqualified =
-    function (arg1, arg2) {
-      // If a name was supplied explicitly as the first argument,
-      // ignore it and use the second argument for the signatures.
-      var sigs = (arg2 == null) ? arg1 : arg2;
+    function (arg1, arg2, arg3) {
+      // Use the Node.js or browser global context by default.
+      var context = (typeof window === 'undefined' ? global : window)
+
+      // There are three supported possibilities for supplied arguments:
+      // * (<constructors>)
+      // * (<type name>, <constructors>)
+      // * (<object>, <type name>, <constructors>)
+      // We handle each case separately.
+      var sigs = null;
+      if (typeof arg2 === 'undefined' && typeof arg3 === 'undefined') {
+        sigs = arg1;
+      } else if (typeof arg3 === 'undefined') {
+        sigs = arg2;
+      } else {
+        context = arg1;
+        sigs = arg3;
+      }
 
       // Since emitted code will refer to UxADT operations
       // by name, the module must be defined in the scope.
       if (typeof uxadt.Value === 'undefined')
         throw "UxADT error: module cannot be found in the scope."
             + "Please ensure that the module is being imported correctly.";
-
-      // Obtain the global context (Node.js or browser).
-      var context = (typeof window === 'undefined' ? global : window);
 
       // Define the constructors as unqualified globals.
       for (var con in sigs)
