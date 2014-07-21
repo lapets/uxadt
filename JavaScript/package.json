@@ -5,7 +5,7 @@
     "name": "Andrei Lapets",
     "email": "lapets@bu.edu"
   },
-  "description": "Universal extensible representation for algebraic data types.",
+  "description": "Universal (cross-language) extensible representation for algebraic data type instances.",
   "homepage": "http://uxadt.org",
   "repository": {
     "type": "git",
