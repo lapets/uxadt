@@ -8,7 +8,7 @@
 --   representation for algebraic data type (ADT) values.
 --
 --   Web:     uxadt.org
---   Version: 0.0.13.0
+--   Version: 0.0.16.0
 --
 --
 
@@ -35,6 +35,7 @@ data UxADT =
     V Variable
   | B Bool
   | R Rational
+  | CH Char -- For internal use only.
   | S String
   | C Constructor [UxADT]
   | L [UxADT]
@@ -49,6 +50,8 @@ uxadt :: Data a => a -> UxADT
 uxadt x =
   let -- Helper function for conversion from lists.
       mkCons :: [UxADT] -> UxADT
+      mkCons [CH c, S cs] = S $ c:cs
+      mkCons [CH c, L []] = S $ c:""
       mkCons [x, L xs] = L $ x:xs
       mkCons _         = None
 
@@ -62,12 +65,16 @@ uxadt x =
        R (toRational (read (show (toConstr x)) :: Float))
      else if ty == "Prelude.Double" then
        R (toRational (read (show (toConstr x)) :: Double))
+     else if ty == "GHC.Real.Ratio" then
+       R $ (\[R n, R d] -> (numerator n) % (numerator d)) [i | i <- gmapQ uxadt x]
      else if ty == "Prelude.[]" then
        case (show (toConstr x)) of
          "(:)" -> mkCons (gmapQ uxadt x)
          "[]" -> L []
      else if ty == "Prelude.(,)" then
        L (gmapQ uxadt x)
+     else if ty == "Prelude.Char" then
+       CH $ head (drop 1 (show (toConstr x)))
      else
        C (show (toConstr x)) (gmapQ uxadt x)
 
@@ -81,30 +88,27 @@ toUxADT = uxadt
 -- | Conversion to an algebraic data type value from a UxADT
 --   value.
 
-fromUxADT :: Data a => DataType -> UxADT -> a
-fromUxADT ty u =
-  let constrByName :: String -> DataType -> Constr
-      constrByName c' t = head [c | c <- dataTypeConstrs t, showConstr c == c']
+fromUxADT :: Data a => [DataType] -> UxADT -> a
+fromUxADT tys u =
+  let constrByName :: String -> [DataType] -> Constr
+      constrByName c' ts = head [c | t <- ts, c <- dataTypeConstrs t, showConstr c == c']
+
+      nxt :: Data a => State [UxADT] a
+      nxt = do {(u:us) <- get; put us; return (fromUxADT tys u)}
   in case u of
-    B b    -> fromConstr (constrByName (show b) (dataTypeOf True))
-    R r    ->
+    B b      -> fromConstr (constrByName (show b) [dataTypeOf True])
+    R r      ->
       let nxt :: Data a => State [Integer] a
           nxt = do {(n:ns) <- get; put ns; return (fromConstr (toConstr n))}
-      in evalState (fromConstrM nxt (constrByName ":%" (dataTypeOf r))) [numerator r, denominator r]
-    C c [] -> fromConstr (constrByName c ty)
-    C c us ->
-      let nxt :: Data a => State [(DataType, UxADT)] a
-          nxt = do {((ty,u):tus) <- get; put tus; return (fromUxADT ty u)}
-      in evalState (fromConstrM nxt (constrByName c ty)) [(ty,u) | u <- us]
-    {-
-    L [] -> fromConstr (constrByName "[]" (dataTypeOf []))
-    L (u:us) ->
-      let nxt :: Data a => State [UxADT] a
-          nxt = do {(u:us) <- get; put us; return (fromUxADT ty u)}
-      in evalState (fromConstrM nxt (constrByName c ty)) us
-    -}
-    _      ->
-      error "UxADT value cannot be converted to native Haskell value."
+      in evalState (fromConstrM nxt (constrByName ":%" [dataTypeOf r])) [numerator r, denominator r]
+    CH c     -> fromConstr (toConstr c)
+    S ""     -> fromConstr (constrByName "[]" [dataTypeOf [()]])
+    S (c:cs) -> evalState (fromConstrM nxt (constrByName "(:)" [dataTypeOf [()]])) [CH c, S cs]
+    C c []   -> fromConstr (constrByName c tys)
+    C c us   -> evalState (fromConstrM nxt (constrByName c tys)) us
+    L []     -> fromConstr (constrByName "[]" [dataTypeOf [()]])
+    L (u:us) -> evalState (fromConstrM nxt (constrByName "(:)" [dataTypeOf [()]])) [u, L us]
+    _        -> error "UxADT value cannot be converted to native Haskell value."
        
 ----------------------------------------------------------------
 -- | Translations between the native UxADT representation and a

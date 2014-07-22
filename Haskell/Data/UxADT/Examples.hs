@@ -23,20 +23,34 @@ import Text.JSON
 import Data.UxADT
 
 ----------------------------------------------------------------
--- | Example
+-- | Example with monomorphic, recursive types.
 
+data Color =
+    Red
+  | Blue
+  deriving (Typeable, Data, Show, Eq)
+    
 data Tree =
-    Node Tree Tree
-  | Twig Tree
-  | Leaf Integer
-  | Stub Rational
-  | Nest Bool
+    Many [Tree]
+  | Two Tree Tree
+  | One Tree
+  | LeafB Bool
+  | LeafR Rational
+  | LeafI Integer
+  | LeafS String
+  | LeafC Color
+  | Leaf
   deriving (Typeable, Data, Show, Eq)
 
-js = showJSON $ uxadt (Node (Node (Leaf 0) (Leaf 1)) (Leaf 2))
+js = showJSON $ uxadt (Two (Two (LeafI 0) (LeafI 1)) (LeafI 2))
 
-treeTy = dataTypeOf (Leaf 4)
+treeTy = dataTypeOf (Leaf)
+colorTy = dataTypeOf (Red)
 
-check = fromUxADT treeTy (C "Node" [(C "Node" [C "Stub" [R (5 % 6)], C "Nest" [B True]]), C "Nest" [B True]]) :: Tree
+dat = Two (Two (LeafR (5 % 6)) (LeafS "Testing.")) (Many [LeafC Red, LeafB False,LeafB True])
+ux = (C "Two" [(C "Two" [C "LeafR" [R (5 % 6)], C "LeafS" [S "Testing."]]), C "Many" [L [C "LeafC" [C "Red" []], C "LeafB" [B False], C "LeafB" [B True]]]])
+
+datToUx = uxadt dat
+uxToDat = fromUxADT [treeTy, colorTy] ux :: Tree
 
 --eof
