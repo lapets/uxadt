@@ -1,7 +1,7 @@
 Name:              uxadt
 Version:           0.0.16.0
 Cabal-Version:     >= 1.6
-License:           GPL-3
+License:           MIT
 License-File:      LICENSE
 Synopsis:          Cross-language extensible representation for algebraic data type instances.
 Description:       A library that supports a universal, cross-platform embedded representation for algebraic data type (ADT) values.
