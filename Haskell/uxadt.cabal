@@ -12,7 +12,7 @@ Build-Type:        Simple
 
 Library
   Exposed-Modules: Data.UxADT
-  Build-Depends:   base >= 3, json, mtl, MissingH
+  Build-Depends:   base >= 3 && < 5, json, mtl, MissingH
 
 Source-Repository head
   Type:            git

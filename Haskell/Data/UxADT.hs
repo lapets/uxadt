@@ -93,9 +93,9 @@ fromUxADT ty u =
       in evalState (fromConstrM nxt (constrByName ":%" (dataTypeOf r))) [numerator r, denominator r]
     C c [] -> fromConstr (constrByName c ty)
     C c us ->
-      let nxt :: Data a => State [UxADT] a
-          nxt = do {(u:us) <- get; put us; return (fromUxADT ty u)}
-      in evalState (fromConstrM nxt (constrByName c ty)) us
+      let nxt :: Data a => State [(DataType, UxADT)] a
+          nxt = do {((ty,u):tus) <- get; put tus; return (fromUxADT ty u)}
+      in evalState (fromConstrM nxt (constrByName c ty)) [(ty,u) | u <- us]
     {-
     L [] -> fromConstr (constrByName "[]" (dataTypeOf []))
     L (u:us) ->
