@@ -17,6 +17,34 @@
   "use strict";
 
   /******************************************************************
+  ** Extend uxadt Error from native TypeError
+  */
+
+  uxadt.Error = function (name, msg) {
+    TypeError.apply(this);
+    this.name = "(UxADT TypeError) " + name;
+    this.message = msg;
+  };
+  uxadt.Error.prototype = Object.create(TypeError.prototype);
+  uxadt.Error.constructor = uxadt.Error;
+
+  /******************************************************************
+  ** Helper functions, factored out of repeatedly called functions
+  */
+
+  var arreq = function (a, b) {
+    if (a === b)
+      return true;
+    if (a.length !== b.length)
+      return false;
+    for (var i = 0, n = a.length; i < n; i++)
+      if (a[i] !== b[i])
+        return false;
+    return true;
+  };
+
+
+  /******************************************************************
   ** Data structure for maintaining the state of a chained matching
   ** expression. It must support the same matching interface as the
   ** one supported by values.
@@ -255,22 +283,45 @@
       // If a qualifier was supplied explicitly as the first argument,
       // use it; otherwise, make a qualifier using the names of the
       // constructors.
-      var sigs, name;
-      if (arg2 == null) {
+      var name, sigs;
+      if (arg2) {
+        name = arg1;
+        sigs = arg2;
+      } else {
         sigs = arg1;
         name = '_Type';
         for (var con in sigs)
-          name = name + '_' + con;
-      } else {
-        sigs = arg2;
-        name = arg1;
+          name = name + '_' + con;        
+      }
+
+      // Assert the type has not already been defined
+      if (context.hasOwnProperty(name)) {
+        var type = "Predefined Type Error";
+        var msg = "Type '" + name + "' has already been defined"; 
+        throw new uxadt.Error(type, msg);
       }
       
       // Create the object that has the constructors as named methods.
       var o = {};
-      for (var con in sigs)
-        o[con] = eval('var f = function () { var v = new uxadt.Value(); v.__ty__ = name; v["' + con + '"] = arguments; return v; }; f');
-        
+      for (var con in sigs) {
+        o[con] = (function () {
+            var con0 = con; // avoid referencing last iterated constructor
+            return function () {
+              var v = new uxadt.Value();
+              v.__ty__ = name;
+              v[con0] = Array.prototype.slice.call(arguments, 0);
+              // type check
+              var tys = v[con0].map(function (c) {return c.__ty__;});
+              if (!arreq(tys, sigs[con0])) {
+                var etype = 'Incompatible Constructors';
+                var emsg = 'Defined ' + tys + ' does not match called ' + sigs[con0];
+                throw new uxadt.Error(etype, emsg);
+              }
+              return v;
+            };
+          })();
+      }  
+
       // Make the named object available in the global context and also return it.
       context[name] = o;
       return o;
