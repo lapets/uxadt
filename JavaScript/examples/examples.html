@@ -9,7 +9,7 @@
 --
 -->
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-  <head><script src="uxadt.js"></script></head>
+  <head><script src="../lib/uxadt.js"></script></head>
   <body id="body" style="font-family:Monospace;">
     <script type="text/javascript">//<![CDATA[
   function show(s) { document.getElementById("body").innerHTML += s + "<br/>"; }
@@ -87,13 +87,13 @@
   ** Defining name-qualified constructors.
   */
 
-  var Color = uxadt.qualified('Color', {
+  uxadt.qualified('Color', {
       'Red': [],
       'Blue': []
     });
 
   uxadt.qualified('Tree', {
-      'Node': [_, _],
+      'Node': ['Tree', 'Tree'],
       'Leaf': []
     });
 
