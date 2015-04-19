@@ -12,7 +12,7 @@
 --
 --
 
-----------------------------------------------------------------
+---------------------------------------------------------------------
 -- 
 
 {-# LANGUAGE DeriveDataTypeable, ScopedTypeVariables #-}
@@ -25,7 +25,7 @@ import Data.Data
 import Text.JSON
 import Control.Monad.State
 
-----------------------------------------------------------------
+---------------------------------------------------------------------
 -- | UxADT Data type definition.
 
 type Variable = String
@@ -42,7 +42,7 @@ data UxADT =
   | None
   deriving (Show, Eq)
 
-----------------------------------------------------------------
+---------------------------------------------------------------------
 -- | Conversion from arbitrary algebraic data type values to
 --   UxADT values.
 
@@ -78,13 +78,13 @@ uxadt x =
      else
        C (show (toConstr x)) (gmapQ uxadt x)
 
-----------------------------------------------------------------
+---------------------------------------------------------------------
 -- | Useful synonym.
 
 toUxADT :: Data a => a -> UxADT
 toUxADT = uxadt
 
-----------------------------------------------------------------
+---------------------------------------------------------------------
 -- | Conversion to an algebraic data type value from a UxADT
 --   value.
 
@@ -110,7 +110,7 @@ fromUxADT tys u =
     L (u:us) -> evalState (fromConstrM nxt (constrByName "(:)" [dataTypeOf [()]])) [u, L us]
     _        -> error "UxADT value cannot be converted to native Haskell value."
        
-----------------------------------------------------------------
+---------------------------------------------------------------------
 -- | Translations between the native UxADT representation and a
 --   native JSON representation.
 

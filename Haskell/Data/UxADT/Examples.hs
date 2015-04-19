@@ -9,7 +9,7 @@
 --
 --
 
-----------------------------------------------------------------
+---------------------------------------------------------------------
 -- 
 
 {-# LANGUAGE DeriveDataTypeable #-}
@@ -20,9 +20,10 @@ module Data.UxADT.Examples
 import Data.Ratio
 import Data.Data
 import Text.JSON
+
 import Data.UxADT
 
-----------------------------------------------------------------
+---------------------------------------------------------------------
 -- | Example with monomorphic, recursive types.
 
 data Color =
