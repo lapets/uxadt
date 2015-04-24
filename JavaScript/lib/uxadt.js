@@ -1,4 +1,4 @@
-/********************************************************************
+/******************************************************************
 ** 
 ** uxadt.js
 **
@@ -12,323 +12,600 @@
 **
 */
 
-(function (uxadt) {
+(function (uxadt, global) {
 
   "use strict";
 
-  /******************************************************************
-  ** Extend uxadt Error from native TypeError
-  */
 
-  uxadt.Error = function (name, msg) {
-    TypeError.apply(this);
-    this.name = "(UxADT TypeError) " + name;
-    this.message = msg;
-  };
-  uxadt.Error.prototype = Object.create(TypeError.prototype);
-  uxadt.Error.constructor = uxadt.Error;
+  var _ = null;
 
-  /******************************************************************
-  ** Helper functions, factored out of repeatedly called functions
-  */
 
-  var arreq = function (a, b) {
-    if (a === b)
-      return true;
-    if (a.length !== b.length)
-      return false;
-    for (var i = 0, n = a.length; i < n; i++)
-      if (a[i] !== b[i])
-        return false;
-    return true;
-  };
 
 
   /******************************************************************
+  ** Matching
+  *******************************************************************
   ** Data structure for maintaining the state of a chained matching
   ** expression. It must support the same matching interface as the
   ** one supported by values.
   */
 
+
+
   // Constructor.
-  uxadt.Matching =
-    function (candidate, end) {
-      if (end == null)
-        this.candidate = candidate;
-      else
-        this.end = end;
+  var Matching = function (candidate, end) {
+      this.candidate = candidate;
+      this.end = end;
     };
+
+
 
   // Matching function.
-  uxadt.Matching.prototype.match =
-    function (p, f) {
-      return (this.candidate == null) ? this : this.candidate.match(p, f);
+  Matching.prototype.match = function (p, f) {
+      return this.end ? this : this.candidate.match(p, f);
     };
-  uxadt.Matching.prototype._ = uxadt.Matching.prototype.match;
+
+  Matching.prototype._ = Matching.prototype.match;
+
+
+
+
+
+
+
+
+
 
   /******************************************************************
+  ** UntypedValue
+  *******************************************************************
   ** Every UxADT value (i.e., instance of a data structure) and every
-  ** UxADT pattern is represented as a Value object.
+  ** UxADT pattern is represented as an UntypedValue object.
   */
 
-  // Constructor.
-  uxadt.Value =
-    function(cons) {
-      this.__ty__ = null;
-      this.__at__ = {};
-      this.__last__ = null;
 
-      for (var con in cons)
-        this[con] = cons[con];
+
+  // constructor for untyped values for pattern matching
+  var UntypedValue = function (con, fields) {
+      this.type = null;
+      this.con = con;
+      this.fields = fields;
+      this.last = null;
     };
 
-  // Structural equality.
-  uxadt.Value.prototype.equal =
-    function (that) {
-      // If we are using stateful match storage, clean up
-      // in case there is anything left over.
-      this.__last__ = null;
+  uxadt.UntypedValue = UntypedValue;
 
-      // Compare the constructors and recursively check equality.
-      for (var c in this) {
-        for (var d in that) {
-          if ( !(c in uxadt.Value.prototype) && !(d in uxadt.Matching.prototype)
-            && (c[0]!='_' && (c.length<2 || c[1]!='_') && d[0]!='_' && (d.length<2 || d[1]!='_'))
-             ) {
-            if (c == d && this[c].length == that[d].length) {
-              for (var i = 0; i < this[c].length; i++)
-                if (!(uxadt.Value.prototype.equal(this[c][i], that[d][i])))
-                  return false;
-              return true;
-            } else {
-              return false;
-            }
+
+
+  // defines an untyped value in env
+  UntypedValue.define = function (env, cons) {
+      if (arguments.length === 1)
+        return UntypedValue.define(global, arguments[0]);
+
+      // assert constructors are undefined
+      for (var con in cons) {
+        if (con in env) {
+          var ename = "Predefined Constructor";
+          var emsg = format("Constructor '%' was already defined", con);
+          throw new uxadt.Error(ename, emsg);
+        }
+      }
+
+      // define constructors
+      for (var con in cons) {
+        env[con] = (function (con) {
+            return function (/* arguments */) {
+                var fields = Array.prototype.slice.call(arguments, 0);
+                return new UntypedValue(con, fields);
+              };
+          })(con);
+      }
+    };
+
+  uxadt.def = UntypedValue.define.bind(UntypedValue);
+
+
+
+  UntypedValue.equal = function (a, b) {
+      if (a === b) {
+        // true equality
+        return true;
+      } else if (a === "#") {
+        // number card
+        return typeof b === "number";
+      } else if (b === "$") {
+        // string card
+        return typeof b === "string";
+      } else if (/^[a-z]+$/.test(a) || /^[a-z]+$/.test(b) || a === null || b === null) {
+        // variable and wild card
+        return true;
+      } else if (a instanceof UntypedValue && b instanceof UntypedValue 
+                 && a.con === b.con && a.fields.length === b.fields.length) {
+        // UxADT values
+        for (var i = 0; i < a.fields.length; i++)
+          if (!UntypedValue.equal(a.fields[i], b.fields[i]))
+            return false;
+        return true;
+      }
+      return false;
+    };
+
+
+
+  // Pattern matching unification algorithm
+  UntypedValue.unify = function (p, v) {
+
+      function extend(a, b) {
+        // shallow copy
+        var a0 = {};
+        for (var k in a)
+          a0[k] = a[k];
+        a = a0;
+        // extend
+        for (var k in b) {
+          if (k in a && !UntypedValue.equal(a[k], b[k])) {
+            // variable redefined
+            var ename = "Unification Error";
+            var emsg = format("Substitution % = % ≠ %", k, a[k], b[k]);
+            throw new uxadt.Error(ename, emsg);
+          } else {
+            a[k] = b[k];
           }
         }
+        return a;
       }
-      return false; // Failure.
-    };
 
-  // Pattern matching unification algorithm.
-  uxadt.Value.prototype.unify =
-    function (p, v) {
-      if (!(p instanceof uxadt.Value) || p == null)
-        return [v];
+      var substs = {ordered: [], named: {}};
 
-      // Compare the constructors and recursively unify if they match.
-      for (var c in p) {
-        for (var d in v) {
-          if ( !(c in uxadt.Value.prototype) && !(d in uxadt.Matching.prototype)
-            && (c[0]!='_' && (c.length<2 || c[1]!='_') && d[0]!='_' && (d.length<2 || d[1]!='_'))
-             ) {
-            if (c == d && p[c].length == v[d].length) {
-              var substs = [];
-              for (var i = 0; i < p[c].length; i++) {
-                var subst = uxadt.Value.prototype.unify(p[c][i], v[d][i]);
-                if (subst == null)
-                  return null;
-                substs = substs.concat(subst);
-              }
-              return substs;
-            } else {
-              return null;
-            }
-          }
-        }
+      // wild card
+      if (p === null) {
+        substs.ordered.push(v);
+        return substs;
       }
-      return null;
-    };
-
-  // Matching function.
-  uxadt.Value.prototype.match =
-    function (p, f) {
-      // If we are using stateful match storage, clean up
-      // in case there is anything left over.
-      this.__last__ = null;
-    
-      var subst = uxadt.Value.prototype.unify(p, this);
-      if (f == null) {
-        if (subst != null && subst.length > 0)
-          this.__last__ = subst;
-        return subst != null;
-      } else {
-        return new uxadt.Matching(this, (subst == null) ? null : f.apply(f, subst));
+      if (v === null) {
+        return substs;
       }
-    };
-  uxadt.Value.prototype._ = uxadt.Value.prototype.match;
 
-  // Last match retrieval when using stateful matching.
-  uxadt.Value.prototype.matched =
-    function matched() {
-      if (this.__last__ != null) {
-        var tmp = this.__last__;
-        this.__last__ = null;
-        return tmp;
-      }
-      // throw error ('UxADT error: can only traverse result of match exactly once after a match has occurred.');
-    };
-
-  // Setting and getting labeled projections.
-  uxadt.Value.prototype.at =
-    function () {
-      if (arguments.length == 1) {
-        var label = arguments[0];
-        return this.__at__[label] != null ? this.__at__[label] : null;
-      } else if (arguments.length == 2) {
-        var label = arguments[0], proj = arguments[1];
-        this.__at__[label] = proj;
-        return this;
-      }
-      return this;
-    };
-
-  // Rendering as a native nested data structure.
-  uxadt.Value.prototype.toData =
-    function () {
-      var s = "";
-      var ss = [];
-      for (var c in this) {
-        if (!(c in uxadt.Value.prototype) && (c[0]!='_' && (c.length<2 || c[1]!='_'))) {
-          for (var i = 0; i < this[c].length; i++)
-            ss.push((this[c][i] instanceof uxadt.Value) ? this[c][i].toData() : this[c][i]);
-          var o = {};
-          o[c] = ss;
-          return o;
-        }
-      }
-    };
-
-  // Rendering as a string.
-  uxadt.Value.prototype.arrayToStringRecursive =
-    function (a) {
-      var s = "";
-      for (var i = 0; i < a.length; i++) {
-        s += (i > 0 ? ', ' : '');
-        if (a[i] instanceof Array) {
-          s += uxadt.Value.prototype.arrayToStringRecursive(a[i]);
-        } else if (typeof a[i] == 'string' || a[i] instanceof String) {
-          s += JSON.stringify(a[i].quote());
+      // number card
+      if (p === "#") {
+        if (typeof v === "number") {
+          substs.ordered.push(v);
+          return substs;
         } else {
-          s += a[i].toString();
+          return null;
         }
       }
-      return "[" + s + "]";
-    };
-  uxadt.Value.prototype.toString =
-    function () {
-      var s = "";
-      for (var c in this) {
-        if (!(c in uxadt.Value.prototype) && (c[0]!='_' && (c.length<2 || c[1]!='_'))) {
-          s = (this.__ty__ != null ? this.__ty__ + '.' : '') + s + c + '('
-          for (var i = 0; i < this[c].length; i++) {
-            s += (i > 0 ? ', ' : '');
-            if (this[c][i] instanceof Array) {
-              s += uxadt.Value.prototype.arrayToStringRecursive(this[c][i]);
-            } else if (typeof this[c][i] == 'string' || this[c][i] instanceof String) {
-              s += JSON.stringify(this[c][i]);
-            } else {
-              s += this[c][i].toString();
-            }
+
+      // string card
+      if (p === "$") {
+        if (typeof v === "string") {
+          substs.ordered.push(v);
+          return substs;
+        } else {
+          return null;
+        }
+      }
+
+      // variable string
+      if (/^[a-z]+$/.test(p)) {
+        substs.ordered.push(v);
+        if (p !== v) {
+          substs.named[p] = v;
+        }
+        return substs;
+      }
+
+      // Compare the constructors and recursively unify List fields if they match
+      if (p instanceof TypedValue && v instanceof TypedValue) {
+        if (p.con === v.con) {
+          return UntypedValue.unify(p.fields, v.fields);
+        } else {
+          return null;
+        }
+      }
+
+      // Compare the constructors and recursively unify Array fields if they match
+      if (p instanceof UntypedValue && v instanceof UntypedValue) {
+        if (p.con === v.con && p.fields.length === v.fields.length) {
+          for (var i = 0; i < p.fields.length; i++) {
+            var subst = UntypedValue.unify(p.fields[i], v.fields[i]);
+            if (subst === null)
+              return null;
+            substs.ordered = substs.ordered.concat(subst.ordered);
+            substs.named = extend(substs.named, subst.named);
           }
-          return s + ')';
+          return substs;
+        } else {
+          return null;
+        }
+      }
+
+      // try equality
+      if (p === v) {
+        return substs;
+      } else {
+        return null;
+      }
+    };
+
+
+
+  // returns a deep copy of this
+  UntypedValue.prototype.clone = function () {
+      var fields = [];
+      for (var i = 0; i < this.fields.length; i++) {
+        e = typeof this.fields[i] === "object" 
+              ? this.fields[i].clone()
+              : this.fields[i];
+        fields.push(e);
+      }
+      return new Value(this.con, fields)
+    };
+
+
+
+  // comparing two untyped values
+  UntypedValue.prototype.equal = function (v) {
+      return UntypedValue.equal(this, v);
+    };
+
+
+
+  // Matching function
+  UntypedValue.prototype._ = UntypedValue.prototype.match = function (p, f) {
+      this.last = null; // clean up stateful match storage
+
+      var subst = UntypedValue.unify(p, this);
+      this.last = subst;
+
+      if (!f) {
+        return !!subst;
+      } else {
+        if (subst) {
+          var end = f.apply(null, subst.ordered);
+          this.last = null;
+          return new Matching(this, end);
+        } else {
+          return new Matching(this, null);
         }
       }
     };
+  
+
+
+  // Last match named substitution retrieval when using stateful matching
+  UntypedValue.prototype.matchedn = function () {
+      if (this.last !== null)
+        return this.last.named;
+    };
+
+
+
+  // Last match ordered substitution retrieval when using stateful matching
+  UntypedValue.prototype.matchedo = function () {
+      if (this.last !== null)
+        return this.last.ordered;
+    };
+
+
+
+  // Rendering as a string
+  UntypedValue.prototype.toString = function () {
+      return format("%(%)", this.con, this.fields.map(String).join(", "));
+    };
+
+
+
+
+
+
+
+
+
+
+
 
   /******************************************************************
-  ** Functions for defining algebraic data type constructors. There
-  ** are two ways techniques supported for introducing constructors:
-  **  * defining them in the local scope as stand-alone, unqualified
-  **    functions by passing the definition string to eval();
-  **  * defining a named class or object that has the named 
-  **    constructors as its only methods.
+  ** TypedValue
+  *******************************************************************
+  ** TypedValues extend UntypedValues, which promise type safety.
   */
 
-  uxadt.unqualified =
-    function (arg1, arg2, arg3) {
-      // Use the Node.js or browser global context by default.
-      var context = (typeof window === 'undefined' ? global : window)
-
-      // There are three supported possibilities for supplied arguments:
-      // * (<constructors>)
-      // * (<type name>, <constructors>)
-      // * (<object>, <type name>, <constructors>)
-      // We handle each case separately.
-      var sigs = null;
-      if (typeof arg2 === 'undefined' && typeof arg3 === 'undefined') {
-        sigs = arg1;
-      } else if (typeof arg3 === 'undefined') {
-        sigs = arg2;
-      } else {
-        context = arg1;
-        sigs = arg3;
-      }
-
-      // Since emitted code will refer to UxADT operations
-      // by name, the module must be defined in the scope.
-      if (typeof uxadt.Value === 'undefined')
-        throw "UxADT error: module cannot be found in the scope."
-            + "Please ensure that the module is being imported correctly.";
-
-      // Define the constructors as unqualified globals.
-      for (var con in sigs)
-        context[con] = eval('var f = function () { var v = new uxadt.Value(); v["' + con + '"] = arguments; return v; }; f');
+  var TypedValue = function (type, con, fields) {
+      UntypedValue.call(this, con, fields); // run the super constructor
+      this.type = type;
     };
 
-  uxadt.qualified =
-    function (arg1, arg2) {
-      // Obtain the global context (Node.js or browser).
-      var context = (typeof window === 'undefined' ? global : window);
+  uxadt.TypedValue = TypedValue;
 
-      // If a qualifier was supplied explicitly as the first argument,
-      // use it; otherwise, make a qualifier using the names of the
-      // constructors.
-      var name, sigs;
-      if (arg2) {
-        name = arg1;
-        sigs = arg2;
-      } else {
-        sigs = arg1;
-        name = '_Type';
-        for (var con in sigs)
-          name = name + '_' + con;        
+
+
+  // inherit methods from UntypedValue
+  TypedValue.prototype = Object.create(UntypedValue.prototype);
+  TypedValue.constructor = TypedValue;
+
+
+
+  // defines
+  TypedValue.define = function (env, typeStr, cons) {
+      if (arguments.length === 2)
+        return TypedValue.define(global, arguments[0], arguments[1]);
+
+      // set of types in current context
+      var tys = env["__tys__"] = env["__tys__"] || {};
+
+      // Parse `typeStr` into Type constructor
+      var type = parseType(typeStr);
+
+      // Assert the type is undefined
+      type._(uxadt.Type(_,_), function (name, args) {
+          if (name in tys) {
+            var etype = "Predefined Type";
+            var emsg = format("Type '%' has already been defined", name); 
+            throw new uxadt.TypeError(etype, emsg);
+          }
+        });
+
+      // Assert all constructors are undefined
+      for (var con in cons) {
+        if (con in env) {
+          var etype = "Predefined Constructor";
+          var emsg = format("Constructor '%' has already been defined", con);
+          throw new uxadt.Error(etype, emsg);
+        }
       }
 
-      // Assert the type has not already been defined
-      if (context.hasOwnProperty(name)) {
-        var type = "Predefined Type Error";
-        var msg = "Type '" + name + "' has already been defined"; 
-        throw new uxadt.Error(type, msg);
+      // Define the constructors
+      type.cons = {};
+      for (var con in cons) {
+        type.cons[con] = arrToList(cons[con].map(parseType));
+        env[con] = (function (con) {
+            return function (/* arguments */) {
+                var defFields = type.cons[con];
+                var thisFields = listMap(argsToList(arguments), function (e) {
+                    if (e === null) {
+                      return null;
+                    } else if (/^[a-z]+$/.test(e)) {
+                      return null;
+                    } else if (e === "#" || typeof e === "number") {
+                      return uxadt.Num();
+                    } else if (e === "$" || typeof e === "string") {
+                      return uxadt.Str();
+                    } else if (e instanceof uxadt.TypedValue) {
+                      return e.type;
+                    } else {
+                      var args = Array.prototype.slice.call(arguments, 0).join(", ");
+                      var emsg = format("% in %(%)", e, con, args);
+                      throw new uxadt.TypeError("Unknown Type", emsg);
+                    }
+                  });
+                try {
+                  var substs = UntypedValue.unify(defFields, thisFields);
+                } catch (e) {
+                  throw new uxadt.TypeError(e.rawName, e.rawMessage);
+                }    
+                if (substs) {
+                  var thisType = type._(uxadt.Type(_,_), function (name, args) {
+                      args = listMap(args, function (a) { return substs.named[a] || a; });
+                      return uxadt.Type(name, args);
+                    }).end;
+                  var fields = argsToList(arguments);
+                  return new TypedValue(thisType, con, fields);
+                } else {
+                  var ename = "Unification";
+                  var emsg = format("% U %", defFields, thisFields);
+                  throw new uxadt.TypeError(ename, emsg);
+                }
+              };
+          })(con);
       }
-      
-      // Create the object that has the constructors as named methods.
-      var o = {};
-      for (var con in sigs) {
-        o[con] = (function () {
-            var con0 = con; // avoid referencing last iterated constructor
-            return function () {
-              var v = new uxadt.Value();
-              v.__ty__ = name;
-              v[con0] = Array.prototype.slice.call(arguments, 0);
-              // type check
-              var tys = v[con0].map(function (c) {return c.__ty__;});
-              if (!arreq(tys, sigs[con0])) {
-                var etype = 'Incompatible Constructors';
-                var emsg = 'Defined ' + tys + ' does not match called ' + sigs[con0];
-                throw new uxadt.Error(etype, emsg);
-              }
-              return v;
-            };
-          })();
-      }  
 
-      // Make the named object available in the global context and also return it.
-      context[name] = o;
-      return o;
     };
 
-  uxadt.definition = uxadt.unqualified;
-  uxadt._ = uxadt.unqualified;
+  uxadt.tdef = TypedValue.define.bind(TypedValue);
 
-})(typeof exports !== 'undefined' ? exports : (this.uxadt = {}));
+
+
+
+  // Matching function
+  TypedValue.prototype.match = function (p, f) {
+      // assert `this` and `p` share a type
+      if (!this.type.equal(p.type)) {
+        var ename = "Type Inequality";
+        var emsg = format("% ≠ %", this.type, p.type);
+        throw new uxadt.TypeError(ename, emsg);
+      }
+
+      // call super method
+      return UntypedValue.prototype.match.call(this, p, f);
+    };
+
+  TypedValue.prototype._ = TypedValue.prototype.match;
+
+
+
+  TypedValue.prototype.toString = function () {
+      return format("%::%%", typeToString(this.type), this.con, listToString(this.fields));
+    };
+
+
+
+
+
+
+
+
+  /******************************************************************
+  ** Utility data types, functions, and errors
+  *******************************************************************
+  ** 
+  ** 
+  */
+
+
+  // base error type for UxADT errors
+  uxadt.Error = function (type, name, message) {
+    Error.apply(this);
+    this.name = format("(UxADT|%) %", type, name);
+    this.rawName = name;
+    this.rawMessage = message;
+    this.message = message;
+  }
+  uxadt.Error.prototype = Object.create(Error.prototype);
+  uxadt.Error.prototype.constructor = uxadt.Error;
+
+
+
+  // extends a `uxadt.Error`
+  uxadt.TypeError = function (name, message) {
+    uxadt.Error.call(this, "TypeError", name, message);
+  }
+  uxadt.TypeError.prototype = Object.create(uxadt.Error.prototype);
+  uxadt.TypeError.prototype.constructor = uxadt.TypeError;
+
+
+
+  // converts a JS arguments object to a UxADT untyped List
+  function argsToList(args) {
+    var arr = Array.prototype.slice.call(args, 0);
+    return arrToList(arr);
+  }
+
+
+
+  // converts a JS array to a UxADT untyped List
+  function arrToList(arr, i) {
+    i = i || 0;
+    return i < arr.length
+            ? uxadt.List(arr[i], arrToList(arr, i+1))
+            : uxadt.Empty();
+  }
+
+
+
+  // sprintf-like function with universal specifier "%"
+  function format(str /*, ... */) {
+    for (var i = 1; i < arguments.length; i++)
+      str = str.replace("%", String(arguments[i]));
+    return str;
+  }
+
+
+
+  // maps a UxADT untyped List `list` by function `f`
+  function listMap(list, f) {
+    return list
+      ._(uxadt.List(_,_), function (x,xs) {
+          return uxadt.List(f(x), listMap(xs, f));
+        })
+      ._(uxadt.Empty(), function () {
+          return uxadt.Empty();
+        })
+      .end;
+  }
+
+
+  // recursively converts a UxADT untyped List `list` to a string
+  function listToString(list) {
+    return "(" + list
+      ._(uxadt.List(_,uxadt.Empty()), function (x) {
+          return format("%)", x);
+        })
+      ._(uxadt.List(_,_), function (x,xs) {
+          return format("%, %", x, listToString(xs));
+        })
+      ._(uxadt.Empty(), function () {
+          return ")";
+        })
+      .end;
+  }
+
+
+  // parses a string `typeString` into a UxADT Type constructor
+  function parseType(typeString) {
+    function throwError() {
+      var ename = "Parsing";
+      var emsg = format("Invalid Type string `%`", typeString)
+      throw new uxadt.TypeError(ename, emsg);      
+    }
+    function parse(ts) {
+      // Number
+      if (ts[0] === "#") {
+        return [uxadt.Num(), ts.slice(1)];
+      // String 
+      } else if (ts[0] === "$") {
+        return [uxadt.Str(), ts.slice(1)];
+      // Type variable 
+      } else if (/^[a-z][A-z]*$/.test(ts[0])) {
+        return [ts[0], ts.slice(1)];
+      // User-defined type 
+      } else if (/^[A-Z][A-z]*$/.test(ts[0])) {
+        var typeName = ts[0];
+        var typeArgs = [];
+        ts = ts.slice(1);
+        if (ts.length && ts[0] === "(") {
+          // User-defined parametric type
+          while (true) {
+            ts = ts.slice(1); // throw out '(' and ','
+            var res = parse(ts);
+            typeArgs.push(res[0]);
+            ts = res[1];
+            if (ts[0] === ',') {
+              continue;
+            } else if (ts[0] === ')') {
+              ts = ts.slice(1);
+              break;
+            } else {
+              throwError();
+            }
+          }
+        }
+        return [uxadt.Type(typeName, arrToList(typeArgs)), ts];
+      }
+      throwError();
+    }
+    var ts, res, type;
+    ts = typeString
+           .split(/([A-z]+|[\(\) #\$])/)
+           .filter(function (t) { return !!t.trim(); });
+    res = parse(ts);
+    type = res[0];
+    ts = res[1];
+    if (ts.length) {
+      throwError();
+    } else {
+      return type;
+    }
+  }
+
+
+  // converts a Type to a string
+  function typeToString(type) {
+    return type
+      ._(uxadt.Type(_,_), function (name, args) {
+          return args._(uxadt.Empty()) ? name : name + listToString(args);
+        })
+      .end
+  }
+
+
+
+  // maps the UntypedValue constructors into the `uxadt` object
+  UntypedValue.define(uxadt, {
+    // List
+    "List": [_,_],
+    "Empty": [],
+
+    // Type
+    "Type": [_,_],
+    "Str": [],
+    "Num": [],
+    "Void": []
+  });
+
+
+
+
+
+})(typeof exports !== "undefined" ? exports : (this.uxadt = {}), typeof global !== "undefined" ? global : window);
 /* eof */
