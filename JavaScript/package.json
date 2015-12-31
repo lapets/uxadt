@@ -3,7 +3,7 @@
   "version": "0.0.16",
   "author": {
     "name": "Andrei Lapets",
-    "email": "lapets@bu.edu"
+    "email": "a@lapets.io"
   },
   "description": "Universal (cross-language) extensible representation for algebraic data type instances.",
   "homepage": "http://uxadt.org",

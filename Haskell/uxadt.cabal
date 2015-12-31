@@ -7,7 +7,7 @@ Synopsis:          Cross-language extensible representation for algebraic data t
 Description:       A library that supports a universal, cross-platform embedded representation for algebraic data type (ADT) values.
 Category:          Data
 Author:            Andrei Lapets
-Maintainer:        Andrei Lapets <lapets@bu.edu>
+Maintainer:        Andrei Lapets <a@lapets.io>
 Build-Type:        Simple
 
 Library
