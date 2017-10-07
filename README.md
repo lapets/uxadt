@@ -1,51 +1,51 @@
 uxadt
 =====
 
-Universal (cross-language) extensible representation for algebraic data type instances.
+Universal (cross-language) extensible representation for algebraic data type instances. More information is available at [uxadt.org](http://uxadt.org).
 
 Directory Structure
 -------------------
 
 The directory structure and locations of noteworthy files are as follows:
 
-* `/Haskell/`
+* `/hs/`
   The Haskell version of the library, ready for packaging.
 
-  - `/Haskell/release.sh`
+  - `/hs/release.sh`
   Release script for building package for manual submission to [HackageDB](http://hackage.haskell.org/).
 
-  - `/Haskell/Text/UxADT.hs`
+  - `/hs/Text/UxADT.hs`
   The source of the Haskell version of the library.
 
-* `/JavaScript/`
+* `/js/`
   The JavaScript version of the library, ready for packaging and publication.
 
-  - `/JavaScript/release.sh`
+  - `/js/release.sh`
   Release script for building package and publishing it on [npmjs.org](https://www.npmjs.org/).
 
-  - `/JavaScript/lib/uxadt.js`
+  - `/js/lib/uxadt.js`
   The source of the JavaScript version of the library.
 
-  - `/JavaScript/examples/`
+  - `/js/examples/`
   Examples illustrating how the library can be used with Node.js and HTML.
 
-* `/PHP/`
+* `/php/`
   The PHP version of the library, ready for packaging and publication.
 
-  - `/PHP/src/uxadt.php`
+  - `/php/src/uxadt.php`
   The source of the PHP version of the library.
 
-  - `/PHP/examples/`
+  - `/php/examples/`
   Examples illustrating how the library can be used in PHP.
 
-* `/Python/`
+* `/py/`
   The Python version of the library, ready for packaging and publication.
 
-  - `/Python/release.sh`
+  - `/py/release.sh`
   Release script for building package and publishing it on [PyPI](https://pypi.python.org/).
 
-  - `/Python/uxadt/uxadt.py`
+  - `/py/uxadt/uxadt.py`
   The source of the Python version of the library.
 
-  - `/Python/examples/`
+  - `/py/examples/`
   Examples illustrating how the library can be used in Python.
