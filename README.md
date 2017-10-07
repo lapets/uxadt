@@ -1,10 +1,13 @@
-uxadt
-=====
+# uxadt
 
 Universal (cross-language) extensible representation for algebraic data type instances. More information is available at [uxadt.org](http://uxadt.org).
 
-Directory Structure
--------------------
+[![npm version and link.](https://badge.fury.io/js/uxadt.svg)](https://badge.fury.io/js/uxadt)
+[![PyPI version and link.](https://badge.fury.io/py/uxadt.svg)](https://badge.fury.io/py/uxadt)
+
+This family of libraries supports a cross-platform embedded representation for algebraic data type (ADT) values, and platform-specific embedded programming abstractions for common operations (such as pattern matching) on algebraic data type values.
+
+## Directory Structure
 
 The directory structure and locations of noteworthy files are as follows:
 
@@ -19,9 +22,6 @@ The directory structure and locations of noteworthy files are as follows:
 
 * `/js/`
   The JavaScript version of the library, ready for packaging and publication.
-
-  - `/js/release.sh`
-  Release script for building package and publishing it on [npmjs.org](https://www.npmjs.org/).
 
   - `/js/lib/uxadt.js`
   The source of the JavaScript version of the library.

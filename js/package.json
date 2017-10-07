@@ -1,10 +1,6 @@
 {
   "name": "uxadt",
-  "version": "0.0.16",
-  "author": {
-    "name": "Andrei Lapets",
-    "email": "a@lapets.io"
-  },
+  "version": "0.1.0",
   "description": "Universal (cross-language) extensible representation for algebraic data type instances.",
   "homepage": "http://uxadt.org",
   "repository": {
@@ -18,12 +14,23 @@
     "algebraic",
     "data",
     "types",
+    "adt",
     "datatypes",
     "functional",
     "case",
     "match",
     "pattern",
     "unification"
+  ],
+  "author": {
+    "name": "Andrei Lapets",
+    "email": "a@lapets.io"
+  },
+  "contributors": [
+    { 
+      "name" : "Chris Kuech", 
+      "email" : "kuech@bu.edu"
+    }
   ],
   "license": "MIT",
   "readmeFilename": "README.md",

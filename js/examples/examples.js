@@ -1,9 +1,8 @@
-/********************************************************************
+/******************************************************************************
 ** 
 ** examples.js
 **
-**   Small examples that illustrate how the uxadt.js module can be
-**   used.
+** Small examples that illustrate how the uxadt.js module can be used.
 **
 */
 
@@ -139,4 +138,3 @@
   console.log("");
 
 })(typeof exports !== 'undefined' ? exports : (this.examples = {}));
-/* eof */
