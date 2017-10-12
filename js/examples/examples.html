@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE html>
 <!-------------------------------------------------------------------
 --
@@ -8,7 +7,7 @@
 --   used.
 --
 -->
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html>
   <head><script src="uxadt.js"></script></head>
   <body id="body" style="font-family:Monospace;">
     <script type="text/javascript">//<![CDATA[
@@ -59,7 +58,7 @@
   show("Example #1");
   show(t0.toString());
   show(JSON.stringify(t0.toData()));
-  t0 = t0.at('size', size(t0));
+  t0.at('size', size(t0));
   show(t0.at('size'));
   show("");
 

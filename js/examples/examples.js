@@ -13,7 +13,7 @@
   var uxadt = require("uxadt");
   var _ = null;
 
-  /******************************************************************
+  /****************************************************************************
   ** Defining constructors in the local scope as stand-alone functions.
   */
 
@@ -57,7 +57,7 @@
   console.log("Example #1");
   console.log(t0.toString());
   console.log(JSON.stringify(t0.toData()));
-  t0 = t0.at('size', size(t0));
+  t0.at('size', size(t0));
   console.log(t0.at('size'));
   console.log("");
 
