@@ -1,23 +1,23 @@
-/******************************************************************************
-** 
-** uxadt.js
-** http://uxadt.org
-**
-** A library that supports a cross-platform embedded representation for
-** algebraic data type (ADT) values, and platform-specific embedded programming
-** abstractions for common operations (such as pattern matching) on algebraic
-** data type values.   
-**
-*/
+/**
+ * uxadt.js
+ * http://uxadt.org
+ *
+ * A library that supports a cross-platform embedded representation for
+ * algebraic data type (ADT) values, and platform-specific embedded programming
+ * abstractions for common operations (such as pattern matching) on algebraic
+ * data type values.   
+ *
+ * @namespace uxadt
+ */
 
 (function (uxadt) {
 
   "use strict";
 
-  /****************************************************************************
-  ** Data structure for maintaining the state of a chained matching expression.
-  ** It must support the same matching interface as the one supported by values.
-  */
+  /**
+   * Data structure for maintaining the state of a chained matching expression.
+   * It must support the same matching interface as the one supported by values.
+   */
 
   // Constructor.
   uxadt.Matching =
@@ -35,10 +35,10 @@
     };
   uxadt.Matching.prototype._ = uxadt.Matching.prototype.match;
 
-  /****************************************************************************
-  ** Every UxADT value (i.e., instance of a data structure) and every UxADT
-  ** pattern is represented as a Value object.
-  */
+  /**
+   * Every UxADT value (i.e., instance of a data structure) and every UxADT
+   * pattern is represented as a Value object.
+   */
 
   // Constructor.
   uxadt.Value =
@@ -204,14 +204,14 @@
       }
     };
 
-  /****************************************************************************
-  ** Functions for defining algebraic data type constructors. There are two
-  ** ways techniques supported for introducing constructors:
-  **  * defining them in the local scope as stand-alone, unqualified functions
-  **    by passing the definition string to eval();
-  **  * defining a named class or object that has the named constructors as its
-  **    only methods.
-  */
+  /**
+   * Functions for defining algebraic data type constructors. There are two
+   * ways techniques supported for introducing constructors:
+   *  * defining them in the local scope as stand-alone, unqualified functions
+   *    by passing the definition string to eval();
+   *  * defining a named class or object that has the named constructors as its
+   *    only methods.
+   */
 
   uxadt.unqualified =
     function (arg1, arg2, arg3) {
