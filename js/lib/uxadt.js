@@ -12,8 +12,6 @@
 
 (function (uxadt) {
 
-  "use strict";
-
   /**
    * Data structure for maintaining the state of a chained matching expression.
    * It must support the same matching interface as the one supported by values.
