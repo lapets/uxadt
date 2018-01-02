@@ -1,6 +1,6 @@
 # uxadt
 
-Universal (cross-language) extensible representation for algebraic data type instances. More information is available at [uxadt.org](http://uxadt.org).
+Cross-platform embedded representation for algebraic data types, values, and common operations. More information is available at [uxadt.org](http://uxadt.org).
 
 [![npm version and link.](https://badge.fury.io/js/uxadt.svg)](https://badge.fury.io/js/uxadt)
 [![PyPI version and link.](https://badge.fury.io/py/uxadt.svg)](https://badge.fury.io/py/uxadt)

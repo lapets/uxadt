@@ -1,13 +1,16 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
-    name             = 'UxADT',
-    version          = '0.0.16.0',
+    name             = 'uxadt',
+    version          = '0.1.0.0',
     packages         = ['uxadt',],
-    license          = 'MIT License',
+    install_requires = [],
+    license          = 'MIT',
 	url              = 'http://uxadt.org',
-	author           = 'A. Lapets',
+	author           = 'Andrei Lapets',
 	author_email     = 'a@lapets.io',
-    description      = 'Universal (cross-language) extensible representation for algebraic data type instances.',
-    long_description = open('README.txt').read(),
+    description      = 'Cross-platform embedded representation for algebraic data types, values, and common operations.',
+    long_description = open('README.rst').read(),
+    test_suite       = 'nose.collector',
+    tests_require    = ['nose'],
 )

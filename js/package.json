@@ -1,7 +1,7 @@
 {
   "name": "uxadt",
   "version": "0.1.0",
-  "description": "Universal (cross-language) extensible representation for algebraic data type instances.",
+  "description": "Cross-platform embedded representation for algebraic data types, values, and common operations.",
   "homepage": "http://uxadt.org",
   "repository": {
     "type": "git",
