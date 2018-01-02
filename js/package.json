@@ -41,7 +41,5 @@
   },
   "scripts": {
     "test": "mocha test"
-  },
-  "analyze": false,
-  "preferGlobal": false
+  }
 }
