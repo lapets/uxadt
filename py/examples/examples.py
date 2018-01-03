@@ -87,7 +87,7 @@ uxadt.qualified('Tree', {\
   })
 
 c0 = Color.Red()
-t0 = Tree.Node(Tree.Node(Tree.Leaf(), Tree.Leaf()), Tree.Leaf())
+t3 = Tree.Node(Tree.Node(Tree.Leaf(), Tree.Leaf()), Tree.Leaf())
 
 def height(t):
     if t < Tree.Leaf():
@@ -98,7 +98,7 @@ def height(t):
 
 print("Example #3")
 print(c0)
-print(str(t0) + " has height " + str(height(t0)) + ".")
+print(str(t3) + " has height " + str(height(t3)) + ".")
 print("")
 
 #####################################################################
