@@ -47,9 +47,11 @@ class Value():
         self.__dict__.update(entries)
         self.__ty__ = ty
 
-    # Structural equality.
     def __eq__(v, w): return v.equal(w)
     def equal(self, other):
+        '''
+        Structural equality.
+        '''
         # If we are using stateful match storage, clean up
         # in case there is anything left over.
         self.__last__ = None
@@ -114,8 +116,10 @@ class Value():
             return iter(tmp)
         raise NameError('UxADT error: can only traverse result of match exactly once after a match has occurred.')
 
-    # Setting and getting labeled projections.
     def at(self, *args):
+        '''
+        Setting and getting labeled projections.
+        '''
         if len(args) == 1:
             label = args[0]
             return self.__at__[label] if label in self.__at__ else None
@@ -208,7 +212,7 @@ def qualified(arg1, arg2 = None):
         def __init__(self, cons):
             self.__dict__.update(cons)
     cls = type(name, (_Type,), {con: eval("lambda *args: Value({'"+con+"': args}, '" + name + "')") for con in sigs}) 
-    
+
     # Make the named class available in the global context and also return it.
     try:
         import inspect
