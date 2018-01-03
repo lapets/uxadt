@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name             = 'uxadt',
-    version          = '0.1.0.0',
+    version          = '0.1.1.0',
     packages         = ['uxadt',],
     install_requires = [],
     license          = 'MIT',
