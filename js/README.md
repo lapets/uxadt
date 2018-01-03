@@ -24,12 +24,14 @@ It does not matter what is assigned to `_`, as long as it is *not a uxadt value*
 
 ## Examples
 
+The following is a simple algebraic data type definition:
 ```javascript
 uxadt._({
     Node: [_, _],
     Leaf: []
   });
 ```
+To better document the implicit constraints associated with the definition, it is possible to provide an explicit name for the algebraic data type and the types of the constructor arguments (no static or dynamic checking of the constraints implied by this information is currently supported by the library itself):
 ```javascript
 uxadt._('Tree', {
     Node: ['Tree', 'Tree'],
@@ -40,6 +42,7 @@ An individual value can then be built up as an expression in the following way:
 ```javascript
 Node(Node(Leaf(), Leaf()), Leaf())
 ```
+Below is a simple recursive function that counts the number of nodes in a tree value (i.e., a value that corresponds to the algebraic data type definition in the above example):
 ```javascript
 function size(t) {
   return t
@@ -48,6 +51,7 @@ function size(t) {
     .end;
 }
 ```
+The library provides an alternate interface for using pattern matching that follows a more imperative paradigm:
 ```javascript
 function size(t) {
   if (t._(Leaf())) {
