@@ -1,5 +1,5 @@
 ## Release script for PyPI.
 
-python setup.py sdist bdist_wininst register upload
+python setup.py sdist upload
 
-##eof
+## eof
