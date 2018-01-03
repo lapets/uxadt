@@ -55,7 +55,7 @@ Below is a simple recursive function that counts the number of nodes in a tree v
         ._(Node(_, _), lambda x,y: 1 + size(x) + size(y))\
         .end
 
-The library provides an alternate interface for using pattern matching that follows a more imperative paradigm (this can be useful because the body of a :code:`lambda` expression cannot be a statement):
+The library provides an alternate interface for using pattern matching that follows a more imperative paradigm (this can be useful because the body of a :code:`lambda` expression cannot be a statement)::
 
     def size(t):
       if t < Leaf():
